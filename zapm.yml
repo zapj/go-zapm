@@ -5,12 +5,19 @@ server:
 services:
   - name: sslwang
     title: SSL Wang
-    run: c://asf/ssa.exe
+    description: SSL Wang Service
+    run: D:\workspaces\golang\sslwang\ssl_wang.exe
     # auto | manual
     startup_type: auto
+    work_dir: D:\workspaces\golang\sslwang
+    env:
+      SSL_MODE: production
+      DEBUG: "false"
+    auto_restart: true
+    max_retries: 3
+    retry_delay: 5
+    log_file: logs/sslwang.log
+    log_max_size: 10
+    log_max_files: 5
 
-  - name: nginx
-    title: Nginx Server
-    run: c://asf/ssa.exe
-    # auto | manual
-    startup_type: auto
+  

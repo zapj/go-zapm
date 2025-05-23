@@ -1,0 +1,42 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.card {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    font-weight: bold;
+    background-color: #f1f1f1;
+}
+
+.log-container {
+    height: 400px;
+    overflow-y: auto;
+    background-color: #212529;
+    color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#log-content {
+    white-space: pre-wrap;
+    margin-bottom: 0;
+}
+
+.status-running {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.status-stopped {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.btn-action {
+    min-width: 80px;
+    margin: 2px;
+}
