@@ -203,7 +203,7 @@ func (p *ZapDaemon) startService(service *Service) error {
 		command.Dir = service.WorkDir
 	}
 
-	if service.Env != nil && len(service.Env) > 0 {
+	if len(service.Env) > 0 {
 		env := os.Environ()
 		for key, value := range service.Env {
 			env = append(env, fmt.Sprintf("%s=%s", key, value))
