@@ -269,7 +269,9 @@ func (p *ZapDaemon) Stop(s service.Service) error {
 	log.Println("正在停止 ZAPM 服务...")
 
 	// 发送停止信号
-	close(p.stopChan)
+	if p.stopChan != nil { // 添加 nil 检查
+		close(p.stopChan)
+	}
 
 	// 停止所有监控器
 	p.mu.Lock()
