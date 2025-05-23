@@ -1,0 +1,16 @@
+server:
+  address: 127.0.0.1
+  port: 2428
+
+services:
+  - name: sslwang
+    title: SSL Wang
+    run: c://asf/ssa.exe
+    # auto | manual
+    startup_type: auto
+
+  - name: nginx
+    title: Nginx Server
+    run: c://asf/ssa.exe
+    # auto | manual
+    startup_type: auto
