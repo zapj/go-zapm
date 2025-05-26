@@ -263,3 +263,19 @@ D:/applications/go/src/runtime/asm_amd64.s:1700 (0x6cb8c0)
 	goexit: BYTE	$0x90	// NOP
 [0m
 [GIN] 2025/05/26 - 13:20:00 | 500 |      2.0715ms |       127.0.0.1 | POST     "/key_generate"
+[2025-05-26 13:40:38] [INFO] [sslwang] 服务已启动，PID: 21024
+2025/05/26 13:40:38 server start:  127.0.0.1:8080
+[GIN] 2025/05/26 - 13:40:42 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/26 - 13:40:42 | 200 |     38.8846ms |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/26 - 13:40:42 | 200 |     36.7654ms |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/26 - 13:40:42 | 200 |     36.7654ms |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/26 - 13:40:42 | 200 |     36.2408ms |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/26 - 13:40:42 | 200 |     36.7654ms |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/26 - 13:40:42 | 200 |     60.7961ms |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/26 - 13:40:42 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/26 - 13:40:42 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+&{0xe9d080 0xc000332a80} 3072
+[GIN] 2025/05/26 - 13:40:47 | 200 |    1.6797356s |       127.0.0.1 | POST     "/key_generate"
+[2025-05-26 13:40:55] [ERROR] [sslwang] 服务异常退出: exit status 1
+[2025-05-26 13:41:04] [INFO] [sslwang] 服务已启动，PID: 31392
+2025/05/26 13:41:05 server start:  127.0.0.1:8080
