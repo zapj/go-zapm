@@ -2,6 +2,7 @@ package zapm
 
 import (
 	"fmt"
+	"time"
 )
 
 type ZapmConfig struct {
@@ -30,7 +31,7 @@ type Service struct {
 	Env         map[string]string `yaml:"env" json:"env"`
 	PidFile     string            `yaml:"pid_file" json:"pidFile"`
 	Pid         int               `yaml:"pid" json:"pid"`
-	StartTime   string            `yaml:"start_time" json:"startTime"`
+	StartTime   time.Time         `yaml:"start_time" json:"startTime"`
 
 	// 自动重启配置
 	AutoRestart bool `yaml:"auto_restart" json:"autoRestart"`

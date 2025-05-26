@@ -279,3 +279,40 @@ D:/applications/go/src/runtime/asm_amd64.s:1700 (0x6cb8c0)
 [2025-05-26 13:40:55] [ERROR] [sslwang] 服务异常退出: exit status 1
 [2025-05-26 13:41:04] [INFO] [sslwang] 服务已启动，PID: 31392
 2025/05/26 13:41:05 server start:  127.0.0.1:8080
+[GIN] 2025/05/26 - 13:48:04 | 200 |       347.6µs |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/26 - 13:48:04 | 200 |     56.4401ms |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/26 - 13:48:04 | 200 |     55.9198ms |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/26 - 13:48:04 | 200 |     55.9148ms |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/26 - 13:48:04 | 200 |     56.4348ms |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/26 - 13:48:04 | 200 |     55.9148ms |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/26 - 13:48:04 | 200 |     70.9074ms |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/26 - 13:48:04 | 200 |       520.1µs |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/26 - 13:48:04 | 200 |       503.2µs |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[GIN] 2025/05/26 - 13:48:05 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/26 - 13:48:05 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/26 - 13:48:05 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/26 - 13:48:05 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/26 - 13:48:05 | 200 |       504.5µs |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/26 - 13:48:05 | 200 |       504.5µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/26 - 13:48:05 | 200 |       331.5µs |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/26 - 13:48:05 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/26 - 13:48:05 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[GIN] 2025/05/26 - 13:53:07 | 200 |      5.0795ms |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/26 - 13:53:07 | 200 |       509.5µs |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[2025-05-26 14:20:35] [INFO] [sslwang] 服务已启动，PID: 25724
+2025/05/26 14:20:35 server start:  127.0.0.1:8080
+2025/05/26 14:20:35 listen: listen tcp 127.0.0.1:8080: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+[2025-05-26 14:20:35] [ERROR] [sslwang] 服务异常退出: exit status 1
+[2025-05-26 14:44:07] [INFO] [sslwang] 服务已启动，PID: 18764
+2025/05/26 14:44:07 server start:  127.0.0.1:8080
+2025/05/26 14:44:07 listen: listen tcp 127.0.0.1:8080: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+[2025-05-26 14:44:07] [ERROR] [sslwang] 服务异常退出: exit status 1
+[2025-05-26 14:44:46] [INFO] [sslwang] 服务已启动，PID: 33356
+2025/05/26 14:44:46 server start:  127.0.0.1:8080

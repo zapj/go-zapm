@@ -192,9 +192,29 @@ func startService(service *Service) error {
 
 	service.Status = "running"
 	service.Pid = command.Process.Pid
+	service.Uptime = 0 // 重置运行时间
+	service.StartTime = time.Now()
 
 	// 记录服务启动日志
 	service.Logger.Info("服务已启动，PID: %d", service.Pid)
+
+	// 创建停止通道用于控制uptime更新goroutine
+	stopChan := make(chan struct{})
+
+	// 在后台更新uptime
+	go func() {
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				service.Uptime = int64(time.Since(service.StartTime).Seconds())
+			case <-stopChan:
+				return
+			}
+		}
+	}()
 
 	// 在后台监控进程退出
 	go func() {
@@ -206,6 +226,7 @@ func startService(service *Service) error {
 		}
 		service.Status = "stopped"
 		service.Pid = 0
+		close(stopChan) // 停止uptime更新goroutine
 	}()
 
 	return nil

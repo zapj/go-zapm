@@ -235,8 +235,7 @@ func (p *ZapDaemon) startService(service *Service) error {
 	service.Pid = command.Process.Pid
 
 	// 记录启动时间
-	now := time.Now()
-	service.StartTime = now.Format(time.RFC3339)
+	service.StartTime = time.Now()
 
 	// 记录启动成功信息
 	logger.Info("服务已启动，PID: %d", service.Pid)
