@@ -2,7 +2,9 @@
 let cpuChart;
 let memoryChart;
 let socket;
+let logSocket;
 let services = [];
+let currentLogService = '';
 
 // 初始化函数
 function init() {
@@ -221,11 +223,69 @@ function setupEventListeners() {
 
 // 获取日志
 function fetchLogs(serviceName) {
-    fetch(`/api/logs?service=${serviceName}`)
-        .then(response => response.text())
-        .then(logs => {
-            document.getElementById('log-content').textContent = logs;
+    const logContent = document.getElementById('log-content');
+    logContent.textContent = '正在连接日志流...';
+    
+    // 关闭之前的日志WebSocket连接
+    if (logSocket && logSocket.readyState === WebSocket.OPEN) {
+        logSocket.close();
+    }
+    
+    // 创建新的WebSocket连接
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/api/stream-logs?service=${serviceName}`;
+    logSocket = new WebSocket(wsUrl);
+    
+    // 自动滚动控制
+    let autoScroll = true;
+    
+    // 添加自动滚动控制按钮
+    const logContainer = document.getElementById('log-container');
+    let scrollControl = document.getElementById('scroll-control');
+    if (!scrollControl) {
+        scrollControl = document.createElement('div');
+        scrollControl.id = 'scroll-control';
+        scrollControl.className = 'scroll-control';
+        scrollControl.innerHTML = `
+            <label>
+                <input type="checkbox" id="auto-scroll" checked> 自动滚动
+            </label>
+        `;
+        logContainer.insertBefore(scrollControl, logContent);
+        
+        // 监听自动滚动复选框
+        document.getElementById('auto-scroll').addEventListener('change', function() {
+            autoScroll = this.checked;
         });
+    }
+    
+    // WebSocket事件处理
+    logSocket.onopen = function() {
+        console.log(`已连接到 ${serviceName} 的日志流`);
+        logContent.textContent = '';
+    };
+    
+    logSocket.onmessage = function(event) {
+        // 添加新的日志行
+        logContent.textContent += event.data + '\n';
+        
+        // 如果启用了自动滚动，则滚动到底部
+        if (autoScroll) {
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+    };
+    
+    logSocket.onerror = function(error) {
+        console.error('WebSocket错误:', error);
+        logContent.textContent += '\n[错误] WebSocket连接出错\n';
+    };
+    
+    logSocket.onclose = function() {
+        console.log('日志WebSocket连接已关闭');
+        if (logContent.textContent === '' || logContent.textContent === '正在连接日志流...') {
+            logContent.textContent = '无日志数据或连接已关闭';
+        }
+    };
 }
 
 // 格式化运行时间

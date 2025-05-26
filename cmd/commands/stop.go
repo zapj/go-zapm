@@ -2,8 +2,8 @@ package commands
 
 import (
 	"fmt"
+	"net/http"
 	"os"
-	"syscall"
 
 	"github.com/spf13/cobra"
 	"github.com/zapj/zapm"
@@ -31,34 +31,19 @@ var stopCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if service.Pid == 0 {
-			fmt.Printf("服务 '%s' 未在运行\n", serviceName)
-			return
-		}
-
-		// 获取进程
-		process, err := os.FindProcess(service.Pid)
+		// 调用API停止服务
+		apiUrl := fmt.Sprintf("http://%s:%d/api/service/%s/stop", zapm.Conf.Server.Address, zapm.Conf.Server.Port, serviceName)
+		resp, err := http.Post(apiUrl, "application/json", nil)
 		if err != nil {
-			fmt.Printf("查找进程失败: %v\n", err)
+			fmt.Printf("调用停止API失败: %v\n", err)
 			os.Exit(1)
 		}
+		defer resp.Body.Close()
 
-		// 发送终止信号
-		err = process.Signal(syscall.SIGTERM)
-		if err != nil {
-			fmt.Printf("发送终止信号失败: %v\n", err)
-
-			// 如果发送 SIGTERM 失败，尝试强制终止
-			err = process.Kill()
-			if err != nil {
-				fmt.Printf("强制终止进程失败: %v\n", err)
-				os.Exit(1)
-			}
+		if resp.StatusCode != http.StatusOK {
+			fmt.Printf("停止服务失败: %s\n", resp.Status)
+			os.Exit(1)
 		}
-
-		// 更新服务状态
-		service.Status = "stopped"
-		service.Pid = 0
 
 		fmt.Printf("服务 '%s' 已停止\n", serviceName)
 	},

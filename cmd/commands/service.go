@@ -2,11 +2,13 @@ package commands
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"path"
+
 	"github.com/kardianos/service"
 	"github.com/spf13/cobra"
 	"github.com/zapj/zapm"
-	"log"
-	"os"
 )
 
 func init() {
@@ -21,10 +23,15 @@ var serviceCmd = &cobra.Command{
 }
 
 func serviceExecute(cmd *cobra.Command, args []string) {
+	exePath, _ := os.Executable()
+
 	svcConfig := &service.Config{
-		Name:        "zapm",
-		DisplayName: "Zap Process Manager",
-		Description: "Zapm is a process management tool.",
+		Name:             "zapm",
+		DisplayName:      "Zapm Services Manager",
+		Description:      "Zapm is a services management tool.",
+		Arguments:        []string{"service"},
+		WorkingDirectory: path.Dir(exePath),
+		// ChRoot:           exePath,
 	}
 
 	prg := &zapm.ZapDaemon{}

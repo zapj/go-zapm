@@ -50,17 +50,25 @@ func LogLevelFromString(level string) LogLevel {
 	}
 }
 
+// LogSubscriber 日志订阅者接口
+type LogSubscriber interface {
+	Send(logLine string) error
+	Close()
+}
+
 // Logger 日志管理器
 type Logger struct {
-	file       *os.File
-	filename   string
-	maxSize    int64 // 最大大小，单位MB
-	maxFiles   int   // 最大文件数
-	size       int64 // 当前大小
-	level      LogLevel
-	mu         sync.Mutex
-	compress   bool   // 是否压缩旧日志
-	serviceTag string // 服务标识
+	file        *os.File
+	filename    string
+	maxSize     int64 // 最大大小，单位MB
+	maxFiles    int   // 最大文件数
+	size        int64 // 当前大小
+	level       LogLevel
+	mu          sync.Mutex
+	compress    bool   // 是否压缩旧日志
+	serviceTag  string // 服务标识
+	subscribers map[LogSubscriber]struct{}
+	subMu       sync.RWMutex
 }
 
 // NewLogger 创建新的日志管理器
@@ -92,14 +100,15 @@ func NewLogger(filename string, maxSize int, maxFiles int, level string, compres
 	}
 
 	return &Logger{
-		file:       f,
-		filename:   filename,
-		maxSize:    int64(maxSize) * 1024 * 1024, // 转换为字节
-		maxFiles:   maxFiles,
-		size:       size,
-		level:      LogLevelFromString(level),
-		compress:   compress,
-		serviceTag: serviceTag,
+		file:        f,
+		filename:    filename,
+		maxSize:     int64(maxSize) * 1024 * 1024, // 转换为字节
+		maxFiles:    maxFiles,
+		size:        size,
+		level:       LogLevelFromString(level),
+		compress:    compress,
+		serviceTag:  serviceTag,
+		subscribers: make(map[LogSubscriber]struct{}),
 	}, nil
 }
 
@@ -150,6 +159,9 @@ func (l *Logger) Log(level LogLevel, format string, args ...interface{}) {
 		return
 	}
 	l.size += int64(n)
+
+	// 广播日志给所有订阅者
+	l.Broadcast(logLine)
 }
 
 // Debug 记录调试级别日志
@@ -263,6 +275,16 @@ func (l *Logger) cleanup() error {
 func (l *Logger) Close() error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
+
+	// 关闭所有订阅者
+	l.subMu.Lock()
+	for subscriber := range l.subscribers {
+		subscriber.Close()
+	}
+	l.subscribers = make(map[LogSubscriber]struct{})
+	l.subMu.Unlock()
+
+	// 关闭日志文件
 	return l.file.Close()
 }
 
@@ -294,4 +316,116 @@ func compressLogFile(source string) error {
 	}
 
 	return nil
+}
+
+// Subscribe 添加日志订阅者
+func (l *Logger) Subscribe(subscriber LogSubscriber) {
+	l.subMu.Lock()
+	defer l.subMu.Unlock()
+	l.subscribers[subscriber] = struct{}{}
+}
+
+// Unsubscribe 移除日志订阅者
+func (l *Logger) Unsubscribe(subscriber LogSubscriber) {
+	l.subMu.Lock()
+	defer l.subMu.Unlock()
+	delete(l.subscribers, subscriber)
+}
+
+// Broadcast 广播日志给所有订阅者
+func (l *Logger) Broadcast(logLine string) {
+	l.subMu.RLock()
+	defer l.subMu.RUnlock()
+
+	for subscriber := range l.subscribers {
+		// 使用goroutine避免阻塞
+		go func(s LogSubscriber, line string) {
+			if err := s.Send(line); err != nil {
+				// 如果发送失败，移除订阅者
+				l.Unsubscribe(s)
+				s.Close()
+			}
+		}(subscriber, logLine)
+	}
+}
+
+// GetRecentLogs 获取最近的日志内容
+func (l *Logger) GetRecentLogs() []string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	// 默认读取最后100行日志
+	const maxLines = 100
+
+	// 如果文件不存在，返回空数组
+	if l.file == nil {
+		return []string{}
+	}
+
+	// 获取文件信息
+	info, err := l.file.Stat()
+	if err != nil {
+		return []string{"Error reading log file: " + err.Error()}
+	}
+
+	// 打开文件进行读取
+	file, err := os.Open(l.filename)
+	if err != nil {
+		return []string{"Error opening log file: " + err.Error()}
+	}
+	defer file.Close()
+
+	// 如果文件很小，直接读取全部内容
+	if info.Size() < 1024*1024 { // 小于1MB
+		content, err := io.ReadAll(file)
+		if err != nil {
+			return []string{"Error reading log content: " + err.Error()}
+		}
+		return strings.Split(strings.TrimSpace(string(content)), "\n")
+	}
+
+	// 对于大文件，从末尾读取
+	var lines []string
+	var pos int64 = 0
+	var buffer = make([]byte, 4096)
+	var lineCount = 0
+
+	// 从文件末尾开始读取
+	for pos < info.Size() && lineCount < maxLines {
+		// 计算读取位置
+		readPos := info.Size() - pos - int64(len(buffer))
+		if readPos < 0 {
+			buffer = make([]byte, info.Size()-pos)
+			readPos = 0
+		}
+
+		// 设置读取位置
+		_, err := file.Seek(readPos, io.SeekStart)
+		if err != nil {
+			return append([]string{"Error seeking in log file: " + err.Error()}, lines...)
+		}
+
+		// 读取数据
+		n, err := file.Read(buffer)
+		if err != nil && err != io.EOF {
+			return append([]string{"Error reading log file: " + err.Error()}, lines...)
+		}
+
+		// 处理读取的数据
+		content := string(buffer[:n])
+		newLines := strings.Split(content, "\n")
+
+		// 添加新行到结果中
+		for i := len(newLines) - 1; i >= 0 && lineCount < maxLines; i-- {
+			if newLines[i] != "" {
+				lines = append([]string{newLines[i]}, lines...)
+				lineCount++
+			}
+		}
+
+		// 更新位置
+		pos += int64(n)
+	}
+
+	return lines
 }

@@ -15,9 +15,10 @@ type ServerConfig struct {
 }
 
 type Service struct {
-	Name        string `yaml:"name" json:"name"`
-	Title       string `yaml:"title" json:"title"`
-	Description string `yaml:"description" json:"description"`
+	Name        string  `yaml:"name" json:"name"`
+	Title       string  `yaml:"title" json:"title"`
+	Description string  `yaml:"description" json:"description"`
+	Logger      *Logger `yaml:"-" json:"-"` // 不序列化到配置文件
 
 	// 启动类型 auto   manual
 	StartupType string            `yaml:"startup_type" json:"startupType"`

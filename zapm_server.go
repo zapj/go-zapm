@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"syscall"
@@ -36,7 +38,8 @@ func StartMonitorServer() error {
 	// API 路由
 	http.HandleFunc("/api/services", ws.getServicesJSON)
 	http.HandleFunc("/api/service/", ws.handleServiceAction) // 统一处理服务操作
-	http.HandleFunc("/api/logs", ws.streamLogs)
+	http.HandleFunc("/api/logs", ws.getLogs)                 // 获取日志（非流式）
+	http.HandleFunc("/api/stream-logs", ws.streamLogs)       // WebSocket流式日志
 	http.HandleFunc("/ws/stats", ws.handleWebSocket)
 
 	// 静态文件路由
@@ -146,12 +149,65 @@ func startService(service *Service) error {
 		command.Dir = service.WorkDir
 	}
 
+	// 初始化服务的Logger
+	if service.Logger == nil {
+		// 使用全局日志目录
+		logDir := LogsDir
+		if logDir == "" {
+			// 如果全局日志目录未设置，使用当前目录下的logs子目录
+			var err error
+			logDir, err = filepath.Abs("logs")
+			if err != nil {
+				return fmt.Errorf("获取日志目录绝对路径失败: %v", err)
+			}
+		}
+
+		// 确保日志目录存在
+		if err := os.MkdirAll(logDir, 0755); err != nil {
+			return fmt.Errorf("创建日志目录失败: %v", err)
+		}
+
+		// 创建日志文件路径
+		logPath := filepath.Join(logDir, fmt.Sprintf("%s.log", service.Name))
+
+		// 记录日志路径
+		log.Printf("服务 %s 的日志文件路径: %s", service.Name, logPath)
+
+		// 初始化Logger
+		logger, err := NewLogger(logPath, 10, 5, "INFO", true, service.Name)
+		if err != nil {
+			return fmt.Errorf("初始化日志系统失败: %v", err)
+		}
+
+		service.Logger = logger
+	}
+
+	// 将命令的标准输出和标准错误重定向到Logger
+	command.Stdout = service.Logger
+	command.Stderr = service.Logger
+
 	if err := command.Start(); err != nil {
 		return err
 	}
 
 	service.Status = "running"
 	service.Pid = command.Process.Pid
+
+	// 记录服务启动日志
+	service.Logger.Info("服务已启动，PID: %d", service.Pid)
+
+	// 在后台监控进程退出
+	go func() {
+		err := command.Wait()
+		if err != nil {
+			service.Logger.Error("服务异常退出: %v", err)
+		} else {
+			service.Logger.Info("服务正常退出")
+		}
+		service.Status = "stopped"
+		service.Pid = 0
+	}()
+
 	return nil
 }
 
@@ -166,8 +222,19 @@ func stopService(service *Service) error {
 		return err
 	}
 
-	if err := process.Signal(syscall.SIGTERM); err != nil {
-		return err
+	// 在Windows平台上直接使用Kill()，在其他平台上尝试使用SIGTERM
+	if runtime.GOOS == "windows" {
+		if err := process.Kill(); err != nil {
+			return err
+		}
+	} else {
+		// 在非Windows平台上，先尝试SIGTERM，如果失败再使用Kill
+		if err := process.Signal(syscall.SIGTERM); err != nil {
+			// 如果发送SIGTERM失败，尝试强制终止
+			if killErr := process.Kill(); killErr != nil {
+				return fmt.Errorf("failed to terminate process: %v (kill attempt also failed: %v)", err, killErr)
+			}
+		}
 	}
 
 	service.Status = "stopped"
@@ -195,6 +262,60 @@ func (ws *WebServer) getServicesJSON(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(services)
 }
 
+// WebSocketLogSubscriber 实现LogSubscriber接口的WebSocket日志订阅者
+type WebSocketLogSubscriber struct {
+	conn *websocket.Conn
+	mu   sync.Mutex
+}
+
+// Send 发送日志到WebSocket连接
+func (ws *WebSocketLogSubscriber) Send(logLine string) error {
+	ws.mu.Lock()
+	defer ws.mu.Unlock()
+	return ws.conn.WriteMessage(websocket.TextMessage, []byte(logLine))
+}
+
+// Close 关闭WebSocket连接
+func (ws *WebSocketLogSubscriber) Close() {
+	ws.mu.Lock()
+	defer ws.mu.Unlock()
+	ws.conn.Close()
+}
+
+// getLogs 获取服务日志（非流式）
+func (ws *WebServer) getLogs(w http.ResponseWriter, r *http.Request) {
+	serviceName := r.URL.Query().Get("service")
+	if serviceName == "" {
+		http.Error(w, "Missing service parameter", http.StatusBadRequest)
+		return
+	}
+
+	// 查找服务
+	var service *Service
+	for i := range Conf.Services {
+		if Conf.Services[i].Name == serviceName {
+			service = &Conf.Services[i]
+			break
+		}
+	}
+
+	if service == nil {
+		http.Error(w, fmt.Sprintf("Service not found: %s", serviceName), http.StatusNotFound)
+		return
+	}
+
+	// 如果日志系统未初始化
+	if service.Logger == nil {
+		http.Error(w, fmt.Sprintf("Logger not initialized for service: %s", serviceName), http.StatusInternalServerError)
+		return
+	}
+
+	// 获取最近的日志内容
+	logs := service.Logger.GetRecentLogs()
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Write([]byte(strings.Join(logs, "\n")))
+}
+
 // streamLogs 流式传输日志
 func (ws *WebServer) streamLogs(w http.ResponseWriter, r *http.Request) {
 	serviceName := r.URL.Query().Get("service")
@@ -203,8 +324,54 @@ func (ws *WebServer) streamLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: 实现日志流式传输
-	w.Write([]byte("Log streaming will be implemented here"))
+	// 升级HTTP连接为WebSocket连接
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("WebSocket升级失败: %v", err)
+		return
+	}
+
+	// 创建WebSocket日志订阅者
+	subscriber := &WebSocketLogSubscriber{
+		conn: conn,
+	}
+
+	// 查找服务
+	var service *Service
+	for i := range Conf.Services {
+		if Conf.Services[i].Name == serviceName {
+			service = &Conf.Services[i]
+			break
+		}
+	}
+
+	if service == nil {
+		subscriber.Send(fmt.Sprintf("错误：未找到服务 %s", serviceName))
+		subscriber.Close()
+		return
+	}
+
+	// 订阅日志
+	if service.Logger != nil {
+		service.Logger.Subscribe(subscriber)
+
+		// 等待连接关闭
+		for {
+			if _, _, err := conn.ReadMessage(); err != nil {
+				if !websocket.IsCloseError(err, websocket.CloseGoingAway) {
+					log.Printf("WebSocket读取错误: %v", err)
+				}
+				break
+			}
+		}
+
+		// 取消订阅并清理资源
+		service.Logger.Unsubscribe(subscriber)
+		subscriber.Close()
+	} else {
+		subscriber.Send(fmt.Sprintf("错误：服务 %s 的日志系统未初始化", serviceName))
+		subscriber.Close()
+	}
 }
 
 // handleWebSocket 处理WebSocket连接
@@ -308,12 +475,20 @@ func (ws *WebServer) broadcastStats() {
 
 // serveStatic 提供静态文件
 func serveStatic(w http.ResponseWriter, r *http.Request) {
-	// 默认返回index.html
+	// 处理根路径请求
 	if r.URL.Path == "/" {
-		http.ServeFile(w, r, "web/index.html")
+		// 直接从嵌入式文件系统读取index.html
+		content, err := webContent.ReadFile("web/index.html")
+		if err != nil {
+			http.Error(w, "无法读取index.html", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write(content)
 		return
 	}
 
-	// 其他静态文件
-	http.ServeFile(w, r, "web/"+r.URL.Path)
+	// 其他静态文件使用文件服务器
+	fileServer := http.FileServer(getEmbeddedFileSystem())
+	fileServer.ServeHTTP(w, r)
 }
