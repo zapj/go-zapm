@@ -1,0 +1,159 @@
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /                         --> github.com/zapj/sslone/controllers.Home (3 handlers)
+[GIN-debug] GET    /ssl_checker              --> github.com/zapj/sslone/controllers.SslChecker (3 handlers)
+[GIN-debug] POST   /ssl_checker_site_status  --> github.com/zapj/sslone/controllers.SslCheckerSiteStatus (3 handlers)
+[GIN-debug] GET    /ssl_decoder              --> github.com/zapj/sslone/controllers.SslDecoder (3 handlers)
+[GIN-debug] POST   /ssl_decoder_pem_cert     --> github.com/zapj/sslone/controllers.SslDecoderPemCert (3 handlers)
+[GIN-debug] GET    /csr_decoder              --> github.com/zapj/sslone/controllers.CsrDecoder (3 handlers)
+[GIN-debug] POST   /csr_decoder              --> github.com/zapj/sslone/controllers.CsrDecoderPost (3 handlers)
+[GIN-debug] GET    /csr_generate             --> github.com/zapj/sslone/controllers.CsrGenerate (3 handlers)
+[GIN-debug] POST   /csr_generate             --> github.com/zapj/sslone/controllers.CsrGenerate (3 handlers)
+[GIN-debug] GET    /key_generate             --> github.com/zapj/sslone/controllers.KeyGenerate (3 handlers)
+[GIN-debug] POST   /key_generate             --> github.com/zapj/sslone/controllers.KeyGenerate (3 handlers)
+[GIN-debug] GET    /rsa_keys_converter       --> github.com/zapj/sslone/controllers.RsaKeysConverter (3 handlers)
+[GIN-debug] POST   /rsa_keys_converter       --> github.com/zapj/sslone/controllers.RsaKeysConverter (3 handlers)
+[GIN-debug] GET    /ssl_converter            --> github.com/zapj/sslone/controllers.SslConverter (3 handlers)
+[GIN-debug] POST   /ssl_converter            --> github.com/zapj/sslone/controllers.SslConverter (3 handlers)
+[GIN-debug] GET    /ocsp_checker             --> github.com/zapj/sslone/controllers.OcspChecker (3 handlers)
+[GIN-debug] POST   /ocsp_checker             --> github.com/zapj/sslone/controllers.OcspChecker (3 handlers)
+[GIN-debug] GET    /csr_key_matcher          --> github.com/zapj/sslone/controllers.CsrKeyMatcher (3 handlers)
+[GIN-debug] POST   /csr_key_matcher          --> github.com/zapj/sslone/controllers.CsrKeyMatcher (3 handlers)
+[GIN-debug] GET    /cert_key_matcher         --> github.com/zapj/sslone/controllers.CertKeyMatcher (3 handlers)
+[GIN-debug] POST   /cert_key_matcher         --> github.com/zapj/sslone/controllers.CertKeyMatcher (3 handlers)
+[GIN-debug] GET    /keystore_fingerprint     --> github.com/zapj/sslone/controllers.AndroidKeyStoreSigner (3 handlers)
+[GIN-debug] POST   /keystore_fingerprint     --> github.com/zapj/sslone/controllers.AndroidKeyStoreSigner (3 handlers)
+[GIN-debug] GET    /tmp/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] HEAD   /tmp/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] GET    /assets/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] HEAD   /assets/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+2025/05/23 18:30:48 server start:  127.0.0.1:8080
+[GIN] 2025/05/23 - 18:30:57 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/23 - 18:30:58 | 200 |     104.203ms |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/23 - 18:30:58 | 200 |    102.0856ms |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/23 - 18:30:58 | 200 |    102.6478ms |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/23 - 18:30:58 | 200 |    103.1579ms |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/23 - 18:30:58 | 200 |    102.5957ms |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/23 - 18:30:58 | 200 |    105.2172ms |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/23 - 18:30:58 | 200 |         350µs |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/23 - 18:30:58 | 200 |       540.3µs |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |       716.3µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |       584.6µs |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |       505.3µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |       519.7µs |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |       649.8µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |       529.9µs |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/23 - 18:31:00 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/23 - 18:31:00 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /                         --> github.com/zapj/sslone/controllers.Home (3 handlers)
+[GIN-debug] GET    /ssl_checker              --> github.com/zapj/sslone/controllers.SslChecker (3 handlers)
+[GIN-debug] POST   /ssl_checker_site_status  --> github.com/zapj/sslone/controllers.SslCheckerSiteStatus (3 handlers)
+[GIN-debug] GET    /ssl_decoder              --> github.com/zapj/sslone/controllers.SslDecoder (3 handlers)
+[GIN-debug] POST   /ssl_decoder_pem_cert     --> github.com/zapj/sslone/controllers.SslDecoderPemCert (3 handlers)
+[GIN-debug] GET    /csr_decoder              --> github.com/zapj/sslone/controllers.CsrDecoder (3 handlers)
+[GIN-debug] POST   /csr_decoder              --> github.com/zapj/sslone/controllers.CsrDecoderPost (3 handlers)
+[GIN-debug] GET    /csr_generate             --> github.com/zapj/sslone/controllers.CsrGenerate (3 handlers)
+[GIN-debug] POST   /csr_generate             --> github.com/zapj/sslone/controllers.CsrGenerate (3 handlers)
+[GIN-debug] GET    /key_generate             --> github.com/zapj/sslone/controllers.KeyGenerate (3 handlers)
+[GIN-debug] POST   /key_generate             --> github.com/zapj/sslone/controllers.KeyGenerate (3 handlers)
+[GIN-debug] GET    /rsa_keys_converter       --> github.com/zapj/sslone/controllers.RsaKeysConverter (3 handlers)
+[GIN-debug] POST   /rsa_keys_converter       --> github.com/zapj/sslone/controllers.RsaKeysConverter (3 handlers)
+[GIN-debug] GET    /ssl_converter            --> github.com/zapj/sslone/controllers.SslConverter (3 handlers)
+[GIN-debug] POST   /ssl_converter            --> github.com/zapj/sslone/controllers.SslConverter (3 handlers)
+[GIN-debug] GET    /ocsp_checker             --> github.com/zapj/sslone/controllers.OcspChecker (3 handlers)
+[GIN-debug] POST   /ocsp_checker             --> github.com/zapj/sslone/controllers.OcspChecker (3 handlers)
+[GIN-debug] GET    /csr_key_matcher          --> github.com/zapj/sslone/controllers.CsrKeyMatcher (3 handlers)
+[GIN-debug] POST   /csr_key_matcher          --> github.com/zapj/sslone/controllers.CsrKeyMatcher (3 handlers)
+[GIN-debug] GET    /cert_key_matcher         --> github.com/zapj/sslone/controllers.CertKeyMatcher (3 handlers)
+[GIN-debug] POST   /cert_key_matcher         --> github.com/zapj/sslone/controllers.CertKeyMatcher (3 handlers)
+[GIN-debug] GET    /keystore_fingerprint     --> github.com/zapj/sslone/controllers.AndroidKeyStoreSigner (3 handlers)
+[GIN-debug] POST   /keystore_fingerprint     --> github.com/zapj/sslone/controllers.AndroidKeyStoreSigner (3 handlers)
+[GIN-debug] GET    /tmp/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] HEAD   /tmp/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] GET    /assets/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] HEAD   /assets/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+2025/05/23 18:31:08 server start:  127.0.0.1:8080
+2025/05/23 18:31:08 listen: listen tcp 127.0.0.1:8080: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/23 - 18:31:10 | 200 |       546.3µs |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/23 - 18:31:10 | 200 |      1.1267ms |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/23 - 18:31:10 | 200 |         655µs |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/23 - 18:31:10 | 200 |       804.3µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/23 - 18:31:10 | 200 |       517.2µs |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[GIN] 2025/05/23 - 18:31:11 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[GIN] 2025/05/23 - 18:31:11 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[GIN] 2025/05/23 - 18:31:11 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[GIN] 2025/05/23 - 18:31:11 | 200 |       504.3µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[GIN] 2025/05/23 - 18:31:11 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[GIN] 2025/05/23 - 18:31:11 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[GIN] 2025/05/23 - 18:31:11 | 200 |         513µs |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[GIN] 2025/05/23 - 18:31:11 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[GIN] 2025/05/23 - 18:31:11 | 200 |       465.3µs |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"

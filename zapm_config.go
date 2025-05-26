@@ -5,8 +5,8 @@ import (
 )
 
 type ZapmConfig struct {
-	Server   ServerConfig `yaml:"server"`
-	Services []Service    `yaml:"services"`
+	Server   ServerConfig `yaml:"server" json:"server"`
+	Services []Service    `yaml:"services" json:"services"`
 }
 
 type ServerConfig struct {

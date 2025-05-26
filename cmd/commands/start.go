@@ -2,10 +2,8 @@ package commands
 
 import (
 	"fmt"
+	"net/http"
 	"os"
-	"os/exec"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -34,81 +32,43 @@ var startCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// 解析命令和参数
-		cmdParts := strings.Fields(service.Run)
-		if len(cmdParts) == 0 {
-			fmt.Printf("服务 '%s' 的命令无效\n", serviceName)
-			os.Exit(1)
-		}
+		// 检查是否使用HTTP API启动
+		if zapm.Conf.Server.Address != "" {
+			apiUrl := fmt.Sprintf("http://%s:%d/api/service/%s/start", zapm.Conf.Server.Address, zapm.Conf.Server.Port, serviceName)
+			fmt.Printf("通过API启动服务: %s\n", apiUrl)
 
-		// 创建命令
-		command := exec.Command(cmdParts[0], cmdParts[1:]...)
-
-		// 设置工作目录（如果指定）
-		if service.WorkDir != "" {
-			command.Dir = service.WorkDir
-		}
-
-		// 设置环境变量
-		if service.Env != nil && len(service.Env) > 0 {
-			// 获取当前环境变量
-			env := os.Environ()
-
-			// 添加服务配置的环境变量
-			for key, value := range service.Env {
-				env = append(env, fmt.Sprintf("%s=%s", key, value))
-			}
-
-			command.Env = env
-		}
-
-		// 创建日志目录
-		logDir := "logs"
-		if err := os.MkdirAll(logDir, 0755); err != nil {
-			fmt.Printf("创建日志目录失败: %v\n", err)
-			os.Exit(1)
-		}
-
-		// 确定日志文件路径
-		var logFilePath string
-		if service.LogFile != "" {
-			// 如果指定了日志文件，使用指定的路径
-			logFilePath = service.LogFile
-			// 确保日志文件所在目录存在
-			logFileDir := filepath.Dir(logFilePath)
-			if err := os.MkdirAll(logFileDir, 0755); err != nil {
-				fmt.Printf("创建日志目录失败: %v\n", err)
+			// 发送HTTP请求
+			client := &http.Client{Timeout: 30 * time.Second}
+			req, err := http.NewRequest("POST", apiUrl, nil)
+			if err != nil {
+				fmt.Printf("创建API请求失败: %v\n", err)
 				os.Exit(1)
 			}
-		} else {
-			// 否则使用默认路径
-			logFilePath = filepath.Join(logDir, fmt.Sprintf("%s.log", serviceName))
+
+			// 重试最多3次
+			var resp *http.Response
+			for i := 0; i < 3; i++ {
+				resp, err = client.Do(req)
+				if err == nil {
+					break
+				}
+				time.Sleep(1 * time.Second)
+			}
+
+			if err != nil {
+				fmt.Printf("API请求失败: %v\n", err)
+				os.Exit(1)
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != http.StatusOK {
+				fmt.Printf("API返回错误状态码: %d\n", resp.StatusCode)
+				os.Exit(1)
+			}
+
+			fmt.Printf("API请求成功，服务已启动\n")
 		}
 
-		// 打开日志文件
-		f, err := os.OpenFile(logFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-		if err != nil {
-			fmt.Printf("打开日志文件失败: %v\n", err)
-			os.Exit(1)
-		}
-		defer f.Close()
-
-		// 设置输出到日志文件
-		command.Stdout = f
-		command.Stderr = f
-
-		// 启动进程
-		if err := command.Start(); err != nil {
-			fmt.Printf("启动服务 '%s' 失败: %v\n", serviceName, err)
-			os.Exit(1)
-		}
-
-		// 更新服务状态
-		service.Status = "running"
-		service.Pid = command.Process.Pid
-		service.StartTime = time.Now().Format(time.RFC3339)
-
-		fmt.Printf("服务 '%s' 已启动，PID: %d\n", serviceName, service.Pid)
 	},
 }
 

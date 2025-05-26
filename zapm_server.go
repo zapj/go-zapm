@@ -195,60 +195,6 @@ func (ws *WebServer) getServicesJSON(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(services)
 }
 
-// startService 启动服务
-func (ws *WebServer) startService(w http.ResponseWriter, r *http.Request) {
-	name := r.URL.Path[len("/api/services/"):]
-	name = strings.TrimSuffix(name, "/start")
-
-	for i := range Conf.Services {
-		if Conf.Services[i].Name == name {
-			if err := startService(&Conf.Services[i]); err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-	}
-	http.Error(w, "Service not found", http.StatusNotFound)
-}
-
-// stopService 停止服务
-func (ws *WebServer) stopService(w http.ResponseWriter, r *http.Request) {
-	name := r.URL.Path[len("/api/services/"):]
-	name = strings.TrimSuffix(name, "/stop")
-
-	for i := range Conf.Services {
-		if Conf.Services[i].Name == name {
-			if err := stopService(&Conf.Services[i]); err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-	}
-	http.Error(w, "Service not found", http.StatusNotFound)
-}
-
-// restartService 重启服务
-func (ws *WebServer) restartService(w http.ResponseWriter, r *http.Request) {
-	name := r.URL.Path[len("/api/services/"):]
-	name = strings.TrimSuffix(name, "/restart")
-
-	for i := range Conf.Services {
-		if Conf.Services[i].Name == name {
-			if err := restartService(&Conf.Services[i]); err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-	}
-	http.Error(w, "Service not found", http.StatusNotFound)
-}
-
 // streamLogs 流式传输日志
 func (ws *WebServer) streamLogs(w http.ResponseWriter, r *http.Request) {
 	serviceName := r.URL.Query().Get("service")
@@ -346,7 +292,7 @@ func (ws *WebServer) broadcastStats() {
 		}
 
 		// 记录广播的数据
-		log.Printf("广播服务状态数据: %+v", stats)
+		// log.Printf("广播服务状态数据: %+v", stats)
 
 		ws.mu.Lock()
 		for client := range ws.clients {

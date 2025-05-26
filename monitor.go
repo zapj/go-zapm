@@ -11,6 +11,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/shirou/gopsutil/v3/cpu"
+	"github.com/shirou/gopsutil/v3/mem"
+
 	"github.com/shirou/gopsutil/v3/process"
 )
 
@@ -53,7 +56,7 @@ func (m *ProcessMonitor) Stop() {
 
 // monitor 监控进程状态
 func (m *ProcessMonitor) monitor() {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 
 	for !m.stopped {
@@ -400,4 +403,75 @@ func FormatBytes(bytes int64) string {
 		exp++
 	}
 	return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])
+}
+
+// SystemMonitor 系统资源监控器
+type SystemMonitor struct {
+	cpuUsage float64
+	memUsage float64
+	mutex    sync.Mutex
+	stopChan chan struct{}
+	stopped  bool
+}
+
+// NewSystemMonitor 创建新的系统资源监控器
+func NewSystemMonitor() *SystemMonitor {
+	return &SystemMonitor{
+		stopChan: make(chan struct{}),
+	}
+}
+
+// Start 开始系统资源监控
+func (m *SystemMonitor) Start() {
+	go m.monitor()
+}
+
+// Stop 停止系统资源监控
+func (m *SystemMonitor) Stop() {
+	close(m.stopChan)
+}
+
+// monitor 监控系统资源使用情况
+func (m *SystemMonitor) monitor() {
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+
+	for !m.stopped {
+		select {
+		case <-m.stopChan:
+			m.stopped = true
+			return
+		case <-ticker.C:
+			if m.stopped {
+				return
+			}
+			m.updateSystemStats()
+		}
+	}
+}
+
+// updateSystemStats 更新系统资源统计信息
+func (m *SystemMonitor) updateSystemStats() {
+	// 获取系统CPU使用率
+	cpuPercents, err := cpu.Percent(0, false)
+	if err == nil && len(cpuPercents) > 0 {
+		m.mutex.Lock()
+		m.cpuUsage = cpuPercents[0]
+		m.mutex.Unlock()
+	}
+
+	// 获取系统内存使用率
+	memInfo, err := mem.VirtualMemory()
+	if err == nil {
+		m.mutex.Lock()
+		m.memUsage = memInfo.UsedPercent
+		m.mutex.Unlock()
+	}
+}
+
+// GetSystemStats 获取系统资源统计信息
+func (m *SystemMonitor) GetSystemStats() (float64, float64) {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	return m.cpuUsage, m.memUsage
 }
