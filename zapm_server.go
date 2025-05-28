@@ -1,6 +1,7 @@
 package zapm
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -161,7 +162,7 @@ func startService(service *Service) error {
 				return fmt.Errorf("获取日志目录绝对路径失败: %v", err)
 			}
 		}
-
+		log.Printf("使用日志目录: %s", logDir)
 		// 确保日志目录存在
 		if err := os.MkdirAll(logDir, 0755); err != nil {
 			return fmt.Errorf("创建日志目录失败: %v", err)
@@ -182,13 +183,42 @@ func startService(service *Service) error {
 		service.Logger = logger
 	}
 
-	// 将命令的标准输出和标准错误重定向到Logger
-	command.Stdout = service.Logger
-	command.Stderr = service.Logger
-
-	if err := command.Start(); err != nil {
-		return err
+	// 创建管道用于捕获输出
+	stdoutPipe, err := command.StdoutPipe()
+	if err != nil {
+		return fmt.Errorf("创建标准输出管道失败: %v", err)
 	}
+	stderrPipe, err := command.StderrPipe()
+	if err != nil {
+		return fmt.Errorf("创建标准错误管道失败: %v", err)
+	}
+
+	// 启动命令
+	if err := command.Start(); err != nil {
+		return fmt.Errorf("启动服务失败: %v", err)
+	}
+
+	// 在后台处理标准输出
+	go func() {
+		scanner := bufio.NewScanner(stdoutPipe)
+		for scanner.Scan() {
+			service.Logger.Info("[STDOUT] %s", scanner.Text())
+		}
+		if err := scanner.Err(); err != nil {
+			service.Logger.Error("读取标准输出失败: %v", err)
+		}
+	}()
+
+	// 在后台处理标准错误
+	go func() {
+		scanner := bufio.NewScanner(stderrPipe)
+		for scanner.Scan() {
+			service.Logger.Error("[STDERR] %s", scanner.Text())
+		}
+		if err := scanner.Err(); err != nil {
+			service.Logger.Error("读取标准错误失败: %v", err)
+		}
+	}()
 
 	service.Status = "running"
 	service.Pid = command.Process.Pid
@@ -198,23 +228,20 @@ func startService(service *Service) error {
 	// 记录服务启动日志
 	service.Logger.Info("服务已启动，PID: %d", service.Pid)
 
-	// 创建停止通道用于控制uptime更新goroutine
-	stopChan := make(chan struct{})
+	// 如果已经有监控器在运行，先停止它
+	if service.Monitor != nil {
+		service.Monitor.Stop()
+		service.Monitor = nil
+	}
 
-	// 在后台更新uptime
-	go func() {
-		ticker := time.NewTicker(1 * time.Second)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ticker.C:
-				service.Uptime = int64(time.Since(service.StartTime).Seconds())
-			case <-stopChan:
-				return
-			}
-		}
-	}()
+	// 创建新的进程监控器
+	monitor, err := NewProcessMonitor(service, service.Logger)
+	if err != nil {
+		service.Logger.Error("创建进程监控器失败: %v", err)
+	} else {
+		service.Monitor = monitor
+		monitor.Start()
+	}
 
 	// 在后台监控进程退出
 	go func() {
@@ -226,7 +253,7 @@ func startService(service *Service) error {
 		}
 		service.Status = "stopped"
 		service.Pid = 0
-		close(stopChan) // 停止uptime更新goroutine
+		// p.Stop()
 	}()
 
 	return nil
@@ -258,6 +285,12 @@ func stopService(service *Service) error {
 		}
 	}
 
+	// 停止监控器
+	if service.Monitor != nil {
+		service.Monitor.Stop()
+		service.Monitor = nil
+	}
+
 	service.Status = "stopped"
 	service.Pid = 0
 	return nil
@@ -285,22 +318,178 @@ func (ws *WebServer) getServicesJSON(w http.ResponseWriter, r *http.Request) {
 
 // WebSocketLogSubscriber 实现LogSubscriber接口的WebSocket日志订阅者
 type WebSocketLogSubscriber struct {
-	conn *websocket.Conn
-	mu   sync.Mutex
+	conn      *websocket.Conn
+	mu        sync.Mutex
+	isClosed  bool
+	done      chan struct{}
+	msgBuffer chan string
+	writeMu   sync.Mutex // 专门用于写入操作的互斥锁
+}
+
+// NewWebSocketLogSubscriber 创建一个新的WebSocket日志订阅者
+func NewWebSocketLogSubscriber(conn *websocket.Conn) *WebSocketLogSubscriber {
+	subscriber := &WebSocketLogSubscriber{
+		conn:      conn,
+		isClosed:  false,
+		done:      make(chan struct{}),
+		msgBuffer: make(chan string, 1000), // 使用带缓冲的通道
+	}
+
+	// 设置WebSocket连接参数
+	conn.SetReadLimit(1024 * 1024) // 1MB的消息大小限制
+	conn.SetReadDeadline(time.Now().Add(120 * time.Second))
+	conn.SetPongHandler(func(string) error {
+		conn.SetReadDeadline(time.Now().Add(120 * time.Second))
+		return nil
+	})
+
+	// 启动消息处理协程
+	go subscriber.processMessages()
+
+	// 启动心跳检测
+	go subscriber.startHeartbeat()
+
+	return subscriber
+}
+
+// processMessages 处理消息队列中的消息
+func (ws *WebSocketLogSubscriber) processMessages() {
+	ticker := time.NewTicker(time.Millisecond * 50) // 控制发送频率
+	defer ticker.Stop()
+
+	var messages []string
+	for {
+		select {
+		case <-ws.done:
+			return
+		case msg := <-ws.msgBuffer:
+			messages = append(messages, msg)
+			// 继续收集消息直到没有更多消息或达到批处理大小
+			for len(messages) < 100 { // 最大批处理大小
+				select {
+				case msg := <-ws.msgBuffer:
+					messages = append(messages, msg)
+				default:
+					goto SendBatch
+				}
+			}
+		SendBatch:
+			if len(messages) > 0 {
+				ws.writeMu.Lock()
+				ws.mu.Lock()
+				if !ws.isClosed {
+					// 设置写入超时
+					ws.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
+					err := ws.conn.WriteMessage(
+						websocket.TextMessage,
+						[]byte(strings.Join(messages, "\n")),
+					)
+					if err != nil {
+						log.Printf("发送消息批次失败: %v", err)
+						ws.isClosed = true
+						ws.conn.Close()
+					}
+				}
+				ws.mu.Unlock()
+				ws.writeMu.Unlock()
+				messages = messages[:0] // 清空切片但保留容量
+			}
+		case <-ticker.C:
+			// 定期刷新剩余消息
+			if len(messages) > 0 {
+				ws.writeMu.Lock()
+				ws.mu.Lock()
+				if !ws.isClosed {
+					ws.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
+					err := ws.conn.WriteMessage(
+						websocket.TextMessage,
+						[]byte(strings.Join(messages, "\n")),
+					)
+					if err != nil {
+						log.Printf("定期刷新消息失败: %v", err)
+						ws.isClosed = true
+						ws.conn.Close()
+					}
+				}
+				ws.mu.Unlock()
+				ws.writeMu.Unlock()
+				messages = messages[:0]
+			}
+		}
+	}
+}
+
+// startHeartbeat 启动心跳检测
+func (ws *WebSocketLogSubscriber) startHeartbeat() {
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			ws.writeMu.Lock()
+			ws.mu.Lock()
+			if !ws.isClosed {
+				// 设置写入超时
+				ws.conn.SetWriteDeadline(time.Now().Add(5 * time.Second))
+				if err := ws.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+					log.Printf("WebSocket心跳发送失败: %v", err)
+					ws.isClosed = true
+					ws.conn.Close()
+					ws.mu.Unlock()
+					ws.writeMu.Unlock()
+					return
+				}
+			} else {
+				ws.mu.Unlock()
+				ws.writeMu.Unlock()
+				return
+			}
+			ws.mu.Unlock()
+			ws.writeMu.Unlock()
+		case <-ws.done:
+			return
+		}
+	}
 }
 
 // Send 发送日志到WebSocket连接
 func (ws *WebSocketLogSubscriber) Send(logLine string) error {
 	ws.mu.Lock()
-	defer ws.mu.Unlock()
-	return ws.conn.WriteMessage(websocket.TextMessage, []byte(logLine))
+	if ws.isClosed {
+		ws.mu.Unlock()
+		return fmt.Errorf("connection is closed")
+	}
+	ws.mu.Unlock()
+
+	// 尝试将消息发送到缓冲区
+	select {
+	case ws.msgBuffer <- logLine:
+		return nil
+	case <-ws.done:
+		return fmt.Errorf("connection is closing")
+	default:
+		// 缓冲区满时返回错误
+		return fmt.Errorf("message buffer is full")
+	}
 }
 
 // Close 关闭WebSocket连接
 func (ws *WebSocketLogSubscriber) Close() {
 	ws.mu.Lock()
-	defer ws.mu.Unlock()
-	ws.conn.Close()
+	if !ws.isClosed {
+		ws.isClosed = true
+		close(ws.done) // 通知所有协程退出
+
+		// 尝试发送关闭消息
+		ws.writeMu.Lock()
+		ws.conn.SetWriteDeadline(time.Now().Add(time.Second))
+		ws.conn.WriteMessage(websocket.CloseMessage,
+			websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+		ws.conn.Close()
+		ws.writeMu.Unlock()
+	}
+	ws.mu.Unlock()
 }
 
 // getLogs 获取服务日志（非流式）
@@ -345,6 +534,8 @@ func (ws *WebServer) streamLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("收到日志流请求，服务: %s", serviceName)
+
 	// 升级HTTP连接为WebSocket连接
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -352,10 +543,28 @@ func (ws *WebServer) streamLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("WebSocket连接已建立，服务: %s", serviceName)
+
+	// 设置连接参数
+	conn.SetReadLimit(4096)                                 // 增加读取消息大小限制到4KB
+	conn.SetReadDeadline(time.Now().Add(120 * time.Second)) // 增加读取超时时间到120秒
+	conn.SetPongHandler(func(string) error {
+		// 收到Pong消息时重置读取超时
+		conn.SetReadDeadline(time.Now().Add(120 * time.Second))
+		log.Printf("收到WebSocket Pong响应，重置读取超时")
+		return nil
+	})
+
+	// 设置写入参数
+	conn.SetWriteDeadline(time.Now().Add(30 * time.Second)) // 增加写入超时到30秒
+
 	// 创建WebSocket日志订阅者
-	subscriber := &WebSocketLogSubscriber{
-		conn: conn,
-	}
+	subscriber := NewWebSocketLogSubscriber(conn)
+	log.Printf("创建WebSocket日志订阅者成功，服务: %s", serviceName)
+
+	// 创建一个done通道用于通知清理工作
+	done := make(chan struct{})
+	defer close(done)
 
 	// 查找服务
 	var service *Service
@@ -367,28 +576,80 @@ func (ws *WebServer) streamLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if service == nil {
+		log.Printf("未找到服务: %s", serviceName)
 		subscriber.Send(fmt.Sprintf("错误：未找到服务 %s", serviceName))
 		subscriber.Close()
 		return
 	}
 
+	log.Printf("找到服务: %s, 状态: %s", serviceName, service.Status)
+
 	// 订阅日志
 	if service.Logger != nil {
+		log.Printf("服务 %s 的Logger已初始化", serviceName)
+
+		// 发送一个测试消息，确认连接正常
+		if err := subscriber.Send("连接已建立，准备发送日志..."); err != nil {
+			log.Printf("发送测试消息失败: %v", err)
+			subscriber.Close()
+			return
+		}
+		// 先发送最近的日志内容，使用速率限制和分批发送
+		recentLogs := service.Logger.GetRecentLogs()
+		log.Printf("准备发送历史日志，共 %d 条", len(recentLogs))
+		for _, line := range recentLogs {
+			if err := subscriber.Send(line); err != nil {
+				log.Printf("发送测试消息失败 recentLogs: %v", err)
+				subscriber.Close()
+				return
+			}
+		}
+
+		// 添加状态转换提示
+		transitionMsg := "=== 历史日志发送完成，正在切换到实时日志模式 ==="
+		if err := subscriber.Send(transitionMsg); err != nil {
+			log.Printf("发送状态转换消息失败: %v", err)
+			subscriber.Close()
+			return
+		}
+
+		// 短暂暂停，确保转换消息被处理
+		time.Sleep(500 * time.Millisecond)
+
+		// 添加实时日志开始分隔符
+		if err := subscriber.Send("=== 实时日志开始 ==="); err != nil {
+			log.Printf("发送实时日志分隔符失败: %v", err)
+			subscriber.Close()
+			return
+		}
+
+		// 订阅新的日志
+		log.Printf("添加WebSocket订阅者到Logger，准备接收实时日志")
 		service.Logger.Subscribe(subscriber)
 
-		// 等待连接关闭
+		// 发送确认消息
+		service.Logger.Info("WebSocket实时日志订阅已激活，开始接收实时日志更新")
+
+		defer func() {
+			log.Printf("清理WebSocket连接，移除订阅者")
+			// 添加实时日志结束分隔符
+			subscriber.Send("=== Realtime Logs End ===")
+			service.Logger.Unsubscribe(subscriber)
+			subscriber.Close()
+		}()
+
+		// 等待连接关闭或错误
 		for {
 			if _, _, err := conn.ReadMessage(); err != nil {
-				if !websocket.IsCloseError(err, websocket.CloseGoingAway) {
+				if websocket.IsUnexpectedCloseError(err,
+					websocket.CloseGoingAway,
+					websocket.CloseNormalClosure,
+					websocket.CloseNoStatusReceived) {
 					log.Printf("WebSocket读取错误: %v", err)
 				}
 				break
 			}
 		}
-
-		// 取消订阅并清理资源
-		service.Logger.Unsubscribe(subscriber)
-		subscriber.Close()
 	} else {
 		subscriber.Send(fmt.Sprintf("错误：服务 %s 的日志系统未初始化", serviceName))
 		subscriber.Close()
@@ -403,6 +664,17 @@ func (ws *WebServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 设置连接参数
+	conn.SetReadLimit(1024 * 1024) // 1MB的消息大小限制
+	conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	conn.SetPongHandler(func(string) error {
+		conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		return nil
+	})
+
+	// 创建一个done通道用于通知清理工作
+	done := make(chan struct{})
+
 	// 注册客户端
 	ws.mu.Lock()
 	ws.clients[conn] = true
@@ -411,26 +683,55 @@ func (ws *WebServer) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	// 发送初始数据
 	if err := conn.WriteJSON(ws.getCurrentStats()); err != nil {
 		log.Printf("发送初始数据失败: %v", err)
+		ws.mu.Lock()
+		delete(ws.clients, conn)
+		ws.mu.Unlock()
 		conn.Close()
 		return
 	}
 
+	// 启动心跳检测
+	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+					conn.Close()
+					return
+				}
+			case <-done:
+				return
+			}
+		}
+	}()
+
 	// 处理连接
 	go func() {
 		defer func() {
+			close(done)
 			ws.mu.Lock()
 			delete(ws.clients, conn)
 			ws.mu.Unlock()
+			conn.WriteMessage(websocket.CloseMessage,
+				websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			conn.Close()
 		}()
 
 		for {
 			if _, _, err := conn.ReadMessage(); err != nil {
-				if !websocket.IsCloseError(err, websocket.CloseGoingAway) {
+				if websocket.IsUnexpectedCloseError(err,
+					websocket.CloseGoingAway,
+					websocket.CloseNormalClosure,
+					websocket.CloseNoStatusReceived) {
 					log.Printf("WebSocket读取错误: %v", err)
 				}
 				break
 			}
+			// 重置读取超时
+			conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 		}
 	}()
 }

@@ -2,19 +2,17 @@ package zapm
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
+
+	"github.com/shirou/gopsutil/v3/process"
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/mem"
-
-	"github.com/shirou/gopsutil/v3/process"
 )
 
 // ProcessMonitor 进程监控器
@@ -166,14 +164,19 @@ func (m *ProcessMonitor) updateStats() {
 
 	// 跨平台进程存活性检查
 	if runtime.GOOS == "windows" {
-		// Windows平台检查方式
-		proc, err := os.FindProcess(int(m.process.Pid))
+		// Windows平台检查方式 - 使用gopsutil的方法检查进程是否存在
+		exists, err := m.process.IsRunning()
 		if err != nil {
-			m.logger.Error("查找进程失败: %v", err)
+			m.logger.Error("检查进程运行状态失败: %v", err)
 			return
 		}
-		// 发送0信号检查进程是否存活
-		err = proc.Signal(syscall.Signal(0))
+		if !exists {
+			m.logger.Error("进程已停止运行")
+			return
+		}
+
+		// 额外检查 - 尝试获取进程命令行
+		_, err = m.process.Cmdline()
 		if err != nil {
 			m.logger.Error("进程已停止运行: %v", err)
 			return
@@ -335,60 +338,72 @@ func getWindowsCPUUsage(pid int) float64 {
 	return 0
 }
 
-// Windows平台特定的内存使用获取函数
+// getWindowsMemoryUsage 获取Windows平台下进程的内存使用
 func getWindowsMemoryUsage(pid int) int64 {
-	// 方法1: 使用WMI查询
-	cmd := exec.Command("wmic", "path", "Win32_PerfFormattedData_PerfProc_Process",
-		"where", fmt.Sprintf("IDProcess=%d", pid), "get", "WorkingSetPrivate")
-
+	// 使用wmic命令获取进程内存使用
+	cmd := exec.Command("wmic", "process", "where", fmt.Sprintf("ProcessId=%d", pid), "get", "WorkingSetSize", "/value")
 	output, err := cmd.Output()
-	if err == nil {
-		lines := strings.Split(string(output), "\n")
-		if len(lines) >= 2 {
-			memStr := strings.TrimSpace(lines[1])
-			if mem, err := strconv.ParseInt(memStr, 10, 64); err == nil {
-				return mem
-			}
-		}
+	if err != nil {
+		return 0
 	}
 
-	// 方法2: 使用PowerShell的Get-Process
-	cmd = exec.Command("powershell", "-Command", fmt.Sprintf(`
-		$process = Get-Process -Id %d -ErrorAction SilentlyContinue
-		if ($process) {
-			$process.WorkingSet64
-		}
-	`, pid))
-
-	output, err = cmd.Output()
-	if err == nil {
-		if memStr := strings.TrimSpace(string(output)); memStr != "" {
-			if mem, err := strconv.ParseInt(memStr, 10, 64); err == nil {
-				return mem
-			}
-		}
+	// 解析输出
+	outputStr := string(output)
+	parts := strings.Split(outputStr, "=")
+	if len(parts) < 2 {
+		return 0
 	}
 
-	// 方法3: 使用tasklist命令
-	cmd = exec.Command("tasklist", "/FI", fmt.Sprintf("PID eq %d", pid), "/FO", "CSV", "/NH")
-	output, err = cmd.Output()
-	if err == nil {
-		lines := strings.Split(string(output), "\n")
-		if len(lines) > 0 {
-			fields := strings.Split(strings.Trim(lines[0], `"`), `","`)
-			if len(fields) >= 5 {
-				// 内存字段通常是第5个字段，格式类似 "8,192 K"
-				memStr := strings.Trim(fields[4], `"`)
-				memStr = strings.Replace(memStr, ",", "", -1)
-				memStr = strings.Replace(memStr, " K", "", -1)
-				if mem, err := strconv.ParseInt(memStr, 10, 64); err == nil {
-					return mem * 1024 // 转换为字节
-				}
-			}
-		}
+	// 尝试转换为int64
+	memStr := strings.TrimSpace(parts[1])
+	memBytes, err := strconv.ParseInt(memStr, 10, 64)
+	if err != nil {
+		return 0
 	}
 
-	return 0
+	return memBytes
+}
+
+// GetProcessUsage 获取指定进程的CPU和内存使用情况
+func GetProcessUsage(pid int) (cpuPercent float64, memoryBytes int64, err error) {
+	// 创建进程对象
+	proc, err := process.NewProcess(int32(pid))
+	if err != nil {
+		return 0, 0, fmt.Errorf("无法获取进程信息: %v", err)
+	}
+
+	if runtime.GOOS == "windows" {
+		// Windows平台特殊处理
+		// 尝试使用gopsutil获取CPU使用率
+		cpuPercent, err = proc.CPUPercent()
+		if err != nil || cpuPercent <= 0 {
+			// 使用备用方法获取CPU使用率
+			cpuPercent = getWindowsCPUUsage(pid)
+		}
+
+		// 尝试使用gopsutil获取内存使用
+		memInfo, err := proc.MemoryInfo()
+		if err != nil || memInfo == nil {
+			// 使用备用方法获取内存使用
+			memoryBytes = getWindowsMemoryUsage(pid)
+		} else {
+			memoryBytes = int64(memInfo.RSS)
+		}
+	} else {
+		// Linux/Unix平台
+		cpuPercent, err = proc.CPUPercent()
+		if err != nil {
+			return 0, 0, fmt.Errorf("获取CPU使用率失败: %v", err)
+		}
+
+		memInfo, err := proc.MemoryInfo()
+		if err != nil {
+			return 0, 0, fmt.Errorf("获取内存使用失败: %v", err)
+		}
+		memoryBytes = int64(memInfo.RSS)
+	}
+
+	return cpuPercent, memoryBytes, nil
 }
 
 // FormatBytes 格式化字节数

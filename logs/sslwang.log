@@ -1,318 +1,73 @@
-[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
-
-[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
- - using env:	export GIN_MODE=release
- - using code:	gin.SetMode(gin.ReleaseMode)
-
-[GIN-debug] GET    /                         --> github.com/zapj/sslone/controllers.Home (3 handlers)
-[GIN-debug] GET    /ssl_checker              --> github.com/zapj/sslone/controllers.SslChecker (3 handlers)
-[GIN-debug] POST   /ssl_checker_site_status  --> github.com/zapj/sslone/controllers.SslCheckerSiteStatus (3 handlers)
-[GIN-debug] GET    /ssl_decoder              --> github.com/zapj/sslone/controllers.SslDecoder (3 handlers)
-[GIN-debug] POST   /ssl_decoder_pem_cert     --> github.com/zapj/sslone/controllers.SslDecoderPemCert (3 handlers)
-[GIN-debug] GET    /csr_decoder              --> github.com/zapj/sslone/controllers.CsrDecoder (3 handlers)
-[GIN-debug] POST   /csr_decoder              --> github.com/zapj/sslone/controllers.CsrDecoderPost (3 handlers)
-[GIN-debug] GET    /csr_generate             --> github.com/zapj/sslone/controllers.CsrGenerate (3 handlers)
-[GIN-debug] POST   /csr_generate             --> github.com/zapj/sslone/controllers.CsrGenerate (3 handlers)
-[GIN-debug] GET    /key_generate             --> github.com/zapj/sslone/controllers.KeyGenerate (3 handlers)
-[GIN-debug] POST   /key_generate             --> github.com/zapj/sslone/controllers.KeyGenerate (3 handlers)
-[GIN-debug] GET    /rsa_keys_converter       --> github.com/zapj/sslone/controllers.RsaKeysConverter (3 handlers)
-[GIN-debug] POST   /rsa_keys_converter       --> github.com/zapj/sslone/controllers.RsaKeysConverter (3 handlers)
-[GIN-debug] GET    /ssl_converter            --> github.com/zapj/sslone/controllers.SslConverter (3 handlers)
-[GIN-debug] POST   /ssl_converter            --> github.com/zapj/sslone/controllers.SslConverter (3 handlers)
-[GIN-debug] GET    /ocsp_checker             --> github.com/zapj/sslone/controllers.OcspChecker (3 handlers)
-[GIN-debug] POST   /ocsp_checker             --> github.com/zapj/sslone/controllers.OcspChecker (3 handlers)
-[GIN-debug] GET    /csr_key_matcher          --> github.com/zapj/sslone/controllers.CsrKeyMatcher (3 handlers)
-[GIN-debug] POST   /csr_key_matcher          --> github.com/zapj/sslone/controllers.CsrKeyMatcher (3 handlers)
-[GIN-debug] GET    /cert_key_matcher         --> github.com/zapj/sslone/controllers.CertKeyMatcher (3 handlers)
-[GIN-debug] POST   /cert_key_matcher         --> github.com/zapj/sslone/controllers.CertKeyMatcher (3 handlers)
-[GIN-debug] GET    /keystore_fingerprint     --> github.com/zapj/sslone/controllers.AndroidKeyStoreSigner (3 handlers)
-[GIN-debug] POST   /keystore_fingerprint     --> github.com/zapj/sslone/controllers.AndroidKeyStoreSigner (3 handlers)
-[GIN-debug] GET    /tmp/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
-[GIN-debug] HEAD   /tmp/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
-[GIN-debug] GET    /assets/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
-[GIN-debug] HEAD   /assets/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
-2025/05/23 18:30:48 server start:  127.0.0.1:8080
-[GIN] 2025/05/23 - 18:30:57 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/23 - 18:30:58 | 200 |     104.203ms |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/23 - 18:30:58 | 200 |    102.0856ms |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/23 - 18:30:58 | 200 |    102.6478ms |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/23 - 18:30:58 | 200 |    103.1579ms |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/23 - 18:30:58 | 200 |    102.5957ms |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/23 - 18:30:58 | 200 |    105.2172ms |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/23 - 18:30:58 | 200 |         350µs |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/23 - 18:30:58 | 200 |       540.3µs |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/23 - 18:30:58 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |       716.3µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |       584.6µs |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |       505.3µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |       519.7µs |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |       649.8µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |       529.9µs |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/23 - 18:30:59 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/23 - 18:31:00 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/23 - 18:31:00 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
-
-[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
- - using env:	export GIN_MODE=release
- - using code:	gin.SetMode(gin.ReleaseMode)
-
-[GIN-debug] GET    /                         --> github.com/zapj/sslone/controllers.Home (3 handlers)
-[GIN-debug] GET    /ssl_checker              --> github.com/zapj/sslone/controllers.SslChecker (3 handlers)
-[GIN-debug] POST   /ssl_checker_site_status  --> github.com/zapj/sslone/controllers.SslCheckerSiteStatus (3 handlers)
-[GIN-debug] GET    /ssl_decoder              --> github.com/zapj/sslone/controllers.SslDecoder (3 handlers)
-[GIN-debug] POST   /ssl_decoder_pem_cert     --> github.com/zapj/sslone/controllers.SslDecoderPemCert (3 handlers)
-[GIN-debug] GET    /csr_decoder              --> github.com/zapj/sslone/controllers.CsrDecoder (3 handlers)
-[GIN-debug] POST   /csr_decoder              --> github.com/zapj/sslone/controllers.CsrDecoderPost (3 handlers)
-[GIN-debug] GET    /csr_generate             --> github.com/zapj/sslone/controllers.CsrGenerate (3 handlers)
-[GIN-debug] POST   /csr_generate             --> github.com/zapj/sslone/controllers.CsrGenerate (3 handlers)
-[GIN-debug] GET    /key_generate             --> github.com/zapj/sslone/controllers.KeyGenerate (3 handlers)
-[GIN-debug] POST   /key_generate             --> github.com/zapj/sslone/controllers.KeyGenerate (3 handlers)
-[GIN-debug] GET    /rsa_keys_converter       --> github.com/zapj/sslone/controllers.RsaKeysConverter (3 handlers)
-[GIN-debug] POST   /rsa_keys_converter       --> github.com/zapj/sslone/controllers.RsaKeysConverter (3 handlers)
-[GIN-debug] GET    /ssl_converter            --> github.com/zapj/sslone/controllers.SslConverter (3 handlers)
-[GIN-debug] POST   /ssl_converter            --> github.com/zapj/sslone/controllers.SslConverter (3 handlers)
-[GIN-debug] GET    /ocsp_checker             --> github.com/zapj/sslone/controllers.OcspChecker (3 handlers)
-[GIN-debug] POST   /ocsp_checker             --> github.com/zapj/sslone/controllers.OcspChecker (3 handlers)
-[GIN-debug] GET    /csr_key_matcher          --> github.com/zapj/sslone/controllers.CsrKeyMatcher (3 handlers)
-[GIN-debug] POST   /csr_key_matcher          --> github.com/zapj/sslone/controllers.CsrKeyMatcher (3 handlers)
-[GIN-debug] GET    /cert_key_matcher         --> github.com/zapj/sslone/controllers.CertKeyMatcher (3 handlers)
-[GIN-debug] POST   /cert_key_matcher         --> github.com/zapj/sslone/controllers.CertKeyMatcher (3 handlers)
-[GIN-debug] GET    /keystore_fingerprint     --> github.com/zapj/sslone/controllers.AndroidKeyStoreSigner (3 handlers)
-[GIN-debug] POST   /keystore_fingerprint     --> github.com/zapj/sslone/controllers.AndroidKeyStoreSigner (3 handlers)
-[GIN-debug] GET    /tmp/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
-[GIN-debug] HEAD   /tmp/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
-[GIN-debug] GET    /assets/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
-[GIN-debug] HEAD   /assets/*filepath         --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
-2025/05/23 18:31:08 server start:  127.0.0.1:8080
-2025/05/23 18:31:08 listen: listen tcp 127.0.0.1:8080: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/23 - 18:31:10 | 200 |       546.3µs |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/23 - 18:31:10 | 200 |      1.1267ms |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/23 - 18:31:10 | 200 |         655µs |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/23 - 18:31:10 | 200 |       804.3µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/23 - 18:31:10 | 200 |       517.2µs |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/23 - 18:31:10 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[GIN] 2025/05/23 - 18:31:11 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/23 - 18:31:11 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/23 - 18:31:11 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/23 - 18:31:11 | 200 |       504.3µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/23 - 18:31:11 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/23 - 18:31:11 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/23 - 18:31:11 | 200 |         513µs |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/23 - 18:31:11 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/23 - 18:31:11 | 200 |       465.3µs |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[2025-05-26 12:17:15] [INFO] [sslwang] 服务已启动，PID: 23864
-[2025-05-26 12:28:10] [INFO] [sslwang] 服务已启动，PID: 25288
-2025/05/26 12:28:10 server start:  127.0.0.1:8080
-2025/05/26 12:28:10 listen: listen tcp 127.0.0.1:8080: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
-[2025-05-26 12:28:10] [ERROR] [sslwang] 服务异常退出: exit status 1
-[2025-05-26 12:28:13] [INFO] [sslwang] 服务已启动，PID: 39856
-2025/05/26 12:28:13 server start:  127.0.0.1:8080
-2025/05/26 12:28:13 listen: listen tcp 127.0.0.1:8080: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
-[2025-05-26 12:28:13] [ERROR] [sslwang] 服务异常退出: exit status 1
-[2025-05-26 13:19:25] [INFO] [sslwang] 服务已启动，PID: 27224
-2025/05/26 13:19:25 server start:  127.0.0.1:8080
-[GIN] 2025/05/26 - 13:19:34 | 200 |       532.4µs |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/26 - 13:19:34 | 200 |     42.1774ms |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/26 - 13:19:34 | 200 |     40.6325ms |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/26 - 13:19:34 | 200 |     36.4043ms |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/26 - 13:19:34 | 200 |     41.1486ms |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/26 - 13:19:34 | 200 |     35.8281ms |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/26 - 13:19:34 | 200 |     58.4399ms |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/26 - 13:19:34 | 200 |         522µs |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/26 - 13:19:35 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-&{0xe9d080 0xc0001cc4c0} 384
-
-
-[31m2025/05/26 13:19:37 [Recovery] 2025/05/26 - 13:19:37 panic recovered:
-runtime error: invalid memory address or nil pointer dereference
-D:/applications/go/src/runtime/panic.go:262 (0x6a73d7)
-	panicmem: panic(memoryError)
-D:/applications/go/src/runtime/signal_windows.go:401 (0x6a73a7)
-	sigpanic: panicmem()
-D:/applications/go/src/crypto/ecdsa/ecdsa.go:174 (0x7cc136)
-	GenerateKey: switch c.Params() {
-D:/workspaces/golang/pkg/mod/github.com/zapj/zapkix@v1.0.33/keyutil/key.go:215 (0xe4de5c)
-	GenerateECKey: key, err := ecdsa.GenerateKey(c, rand.Reader)
-D:/workspaces/golang/pkg/mod/github.com/zapj/zapkix@v1.0.33/keyutil/key.go:117 (0xe4d658)
-	GenerateSigner: return GenerateECKey(size)
-D:/workspaces/golang/pkg/mod/github.com/zapj/zapkix@v1.0.33/keyutil/key.go:88 (0xe4d564)
-	GenerateKey: return GenerateSigner(algo, size)
-D:/workspaces/golang/pkg/mod/github.com/zapj/zapkix@v1.0.33/pki/key.go:54 (0xe580e4)
-	(*KeyRequest).Generate: pkey, err = keyutil.GenerateKey(kr.A, kr.S)
-D:/workspaces/golang/sslwang/controllers/key_generate.go:27 (0xe62448)
-	KeyGenerate: _, err := ck.Generate()
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0xb6e10e)
-	(*Context).Next: c.handlers[c.index](c)
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/recovery.go:102 (0xb6e0fb)
-	CustomRecoveryWithWriter.func1: c.Next()
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0xb6d25c)
-	(*Context).Next: c.handlers[c.index](c)
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/logger.go:240 (0xb6d243)
-	LoggerWithConfig.func1: c.Next()
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0xb6c7ad)
-	(*Context).Next: c.handlers[c.index](c)
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:620 (0xb6c444)
-	(*Engine).handleHTTPRequest: c.Next()
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:576 (0xb6bf89)
-	(*Engine).ServeHTTP: engine.handleHTTPRequest(c)
-D:/applications/go/src/net/http/server.go:3301 (0x93b18d)
-	serverHandler.ServeHTTP: handler.ServeHTTP(rw, req)
-D:/applications/go/src/net/http/server.go:2102 (0x92bfa4)
-	(*conn).serve: serverHandler{c.server}.ServeHTTP(w, w.req)
-D:/applications/go/src/runtime/asm_amd64.s:1700 (0x6cb8c0)
-	goexit: BYTE	$0x90	// NOP
-[0m
-[GIN] 2025/05/26 - 13:19:37 | 500 |     10.9136ms |       127.0.0.1 | POST     "/key_generate"
-&{0xe9d080 0xc0001cc4c0} 521
-
-
-[31m2025/05/26 13:20:00 [Recovery] 2025/05/26 - 13:20:00 panic recovered:
-runtime error: invalid memory address or nil pointer dereference
-D:/applications/go/src/runtime/panic.go:262 (0x6a73d7)
-	panicmem: panic(memoryError)
-D:/applications/go/src/runtime/signal_windows.go:401 (0x6a73a7)
-	sigpanic: panicmem()
-D:/applications/go/src/crypto/ecdsa/ecdsa.go:174 (0x7cc136)
-	GenerateKey: switch c.Params() {
-D:/workspaces/golang/pkg/mod/github.com/zapj/zapkix@v1.0.33/keyutil/key.go:215 (0xe4de5c)
-	GenerateECKey: key, err := ecdsa.GenerateKey(c, rand.Reader)
-D:/workspaces/golang/pkg/mod/github.com/zapj/zapkix@v1.0.33/keyutil/key.go:117 (0xe4d658)
-	GenerateSigner: return GenerateECKey(size)
-D:/workspaces/golang/pkg/mod/github.com/zapj/zapkix@v1.0.33/keyutil/key.go:88 (0xe4d564)
-	GenerateKey: return GenerateSigner(algo, size)
-D:/workspaces/golang/pkg/mod/github.com/zapj/zapkix@v1.0.33/pki/key.go:54 (0xe580e4)
-	(*KeyRequest).Generate: pkey, err = keyutil.GenerateKey(kr.A, kr.S)
-D:/workspaces/golang/sslwang/controllers/key_generate.go:27 (0xe62448)
-	KeyGenerate: _, err := ck.Generate()
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0xb6e10e)
-	(*Context).Next: c.handlers[c.index](c)
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/recovery.go:102 (0xb6e0fb)
-	CustomRecoveryWithWriter.func1: c.Next()
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0xb6d25c)
-	(*Context).Next: c.handlers[c.index](c)
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/logger.go:240 (0xb6d243)
-	LoggerWithConfig.func1: c.Next()
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0xb6c7ad)
-	(*Context).Next: c.handlers[c.index](c)
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:620 (0xb6c444)
-	(*Engine).handleHTTPRequest: c.Next()
-D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:576 (0xb6bf89)
-	(*Engine).ServeHTTP: engine.handleHTTPRequest(c)
-D:/applications/go/src/net/http/server.go:3301 (0x93b18d)
-	serverHandler.ServeHTTP: handler.ServeHTTP(rw, req)
-D:/applications/go/src/net/http/server.go:2102 (0x92bfa4)
-	(*conn).serve: serverHandler{c.server}.ServeHTTP(w, w.req)
-D:/applications/go/src/runtime/asm_amd64.s:1700 (0x6cb8c0)
-	goexit: BYTE	$0x90	// NOP
-[0m
-[GIN] 2025/05/26 - 13:20:00 | 500 |      2.0715ms |       127.0.0.1 | POST     "/key_generate"
-[2025-05-26 13:40:38] [INFO] [sslwang] 服务已启动，PID: 21024
-2025/05/26 13:40:38 server start:  127.0.0.1:8080
-[GIN] 2025/05/26 - 13:40:42 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/26 - 13:40:42 | 200 |     38.8846ms |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/26 - 13:40:42 | 200 |     36.7654ms |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/26 - 13:40:42 | 200 |     36.7654ms |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/26 - 13:40:42 | 200 |     36.2408ms |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/26 - 13:40:42 | 200 |     36.7654ms |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/26 - 13:40:42 | 200 |     60.7961ms |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/26 - 13:40:42 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/26 - 13:40:42 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-&{0xe9d080 0xc000332a80} 3072
-[GIN] 2025/05/26 - 13:40:47 | 200 |    1.6797356s |       127.0.0.1 | POST     "/key_generate"
-[2025-05-26 13:40:55] [ERROR] [sslwang] 服务异常退出: exit status 1
-[2025-05-26 13:41:04] [INFO] [sslwang] 服务已启动，PID: 31392
-2025/05/26 13:41:05 server start:  127.0.0.1:8080
-[GIN] 2025/05/26 - 13:48:04 | 200 |       347.6µs |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/26 - 13:48:04 | 200 |     56.4401ms |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/26 - 13:48:04 | 200 |     55.9198ms |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/26 - 13:48:04 | 200 |     55.9148ms |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/26 - 13:48:04 | 200 |     56.4348ms |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/26 - 13:48:04 | 200 |     55.9148ms |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/26 - 13:48:04 | 200 |     70.9074ms |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/26 - 13:48:04 | 200 |       520.1µs |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/26 - 13:48:04 | 200 |       503.2µs |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[GIN] 2025/05/26 - 13:48:05 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/26 - 13:48:05 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/26 - 13:48:05 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/26 - 13:48:05 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/26 - 13:48:05 | 200 |       504.5µs |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/26 - 13:48:05 | 200 |       504.5µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/26 - 13:48:05 | 200 |       331.5µs |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/26 - 13:48:05 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/26 - 13:48:05 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[GIN] 2025/05/26 - 13:53:07 | 200 |      5.0795ms |       127.0.0.1 | GET      "/key_generate"
-[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
-[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
-[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
-[GIN] 2025/05/26 - 13:53:07 | 200 |       509.5µs |       127.0.0.1 | GET      "/assets/js/ssl.js"
-[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
-[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
-[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
-[GIN] 2025/05/26 - 13:53:07 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
-[2025-05-26 14:20:35] [INFO] [sslwang] 服务已启动，PID: 25724
-2025/05/26 14:20:35 server start:  127.0.0.1:8080
-2025/05/26 14:20:35 listen: listen tcp 127.0.0.1:8080: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
-[2025-05-26 14:20:35] [ERROR] [sslwang] 服务异常退出: exit status 1
-[2025-05-26 14:44:07] [INFO] [sslwang] 服务已启动，PID: 18764
-2025/05/26 14:44:07 server start:  127.0.0.1:8080
-2025/05/26 14:44:07 listen: listen tcp 127.0.0.1:8080: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
-[2025-05-26 14:44:07] [ERROR] [sslwang] 服务异常退出: exit status 1
-[2025-05-26 14:44:46] [INFO] [sslwang] 服务已启动，PID: 33356
-2025/05/26 14:44:46 server start:  127.0.0.1:8080
+[2025-05-28 09:57:52] [INFO] [sslwang] 服务已启动，PID: 7424
+[2025-05-28 09:57:52] [ERROR] [sslwang] [STDERR] 2025/05/28 09:57:52 server start:  127.0.0.1:8080
+[2025-05-28 09:57:57] [INFO] [sslwang] WebSocket实时日志订阅已激活，开始接收实时日志更新
+[2025-05-28 09:58:12] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:12 | 200 |       507.4µs |       127.0.0.1 | GET      "/csr_decoder"
+[2025-05-28 09:58:12] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:12 | 200 |    166.0658ms |       127.0.0.1 | GET      "/assets/css/style.css"
+[2025-05-28 09:58:12] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:12 | 200 |    165.0261ms |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[2025-05-28 09:58:12] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:12 | 200 |    165.0261ms |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[2025-05-28 09:58:12] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:12 | 200 |    165.0261ms |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[2025-05-28 09:58:12] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:12 | 200 |    165.0261ms |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[2025-05-28 09:58:12] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:12 | 200 |    186.6744ms |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[2025-05-28 09:58:12] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:12 | 200 |       524.4µs |       127.0.0.1 | GET      "/assets/js/checker.js"
+[2025-05-28 09:58:12] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:12 | 200 |       505.2µs |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[2025-05-28 09:58:22] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:22 | 200 |            0s |       127.0.0.1 | GET      "/csr_decoder"
+[2025-05-28 09:58:22] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:22 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[2025-05-28 09:58:22] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:22 | 200 |       4.657ms |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[2025-05-28 09:58:22] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:22 | 200 |       566.3µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[2025-05-28 09:58:22] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:22 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[2025-05-28 09:58:22] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:22 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[2025-05-28 09:58:22] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:22 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[2025-05-28 09:58:22] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:22 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[2025-05-28 09:58:22] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:22 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[2025-05-28 09:58:23] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:23 | 200 |            0s |       127.0.0.1 | GET      "/key_generate"
+[2025-05-28 09:58:23] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:23 | 200 |            0s |       127.0.0.1 | GET      "/assets/css/style.css"
+[2025-05-28 09:58:23] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:23 | 200 |       520.5µs |       127.0.0.1 | GET      "/assets/fontawesome/css/all.min.css"
+[2025-05-28 09:58:23] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:23 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/ssl.js"
+[2025-05-28 09:58:23] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:23 | 200 |      5.6687ms |       127.0.0.1 | GET      "/assets/bs5/css/bootstrap.min.css"
+[2025-05-28 09:58:23] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:23 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/axios.min.js"
+[2025-05-28 09:58:23] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:23 | 200 |            0s |       127.0.0.1 | GET      "/assets/bs5/js/bootstrap.bundle.min.js"
+[2025-05-28 09:58:23] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:23 | 200 |            0s |       127.0.0.1 | GET      "/assets/js/checker.js"
+[2025-05-28 09:58:23] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:23 | 200 |            0s |       127.0.0.1 | GET      "/assets/fontawesome/webfonts/fa-solid-900.woff2"
+[2025-05-28 09:58:45] [INFO] [sslwang] [STDOUT] &{0x99d080 0xc000420ec0} 384
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] [31m2025/05/28 09:58:45 [Recovery] 2025/05/28 - 09:58:45 panic recovered:
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] runtime error: invalid memory address or nil pointer dereference
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/applications/go/src/runtime/panic.go:262 (0x1a73d7)
+[2025-05-28 09:58:45] [INFO] [sslwang] [STDOUT] [GIN] 2025/05/28 - 09:58:45 | 500 |     19.3999ms |       127.0.0.1 | POST     "/key_generate"
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	panicmem: panic(memoryError)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/applications/go/src/runtime/signal_windows.go:401 (0x1a73a7)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	sigpanic: panicmem()
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/applications/go/src/crypto/ecdsa/ecdsa.go:174 (0x2cc136)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	GenerateKey: switch c.Params() {
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/workspaces/golang/pkg/mod/github.com/zapj/zapkix@v1.0.33/keyutil/key.go:215 (0x94de5c)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	GenerateECKey: key, err := ecdsa.GenerateKey(c, rand.Reader)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/workspaces/golang/pkg/mod/github.com/zapj/zapkix@v1.0.33/keyutil/key.go:117 (0x94d658)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	GenerateSigner: return GenerateECKey(size)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/workspaces/golang/pkg/mod/github.com/zapj/zapkix@v1.0.33/keyutil/key.go:88 (0x94d564)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	GenerateKey: return GenerateSigner(algo, size)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/workspaces/golang/pkg/mod/github.com/zapj/zapkix@v1.0.33/pki/key.go:54 (0x9580e4)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	(*KeyRequest).Generate: pkey, err = keyutil.GenerateKey(kr.A, kr.S)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/workspaces/golang/sslwang/controllers/key_generate.go:27 (0x962448)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	KeyGenerate: _, err := ck.Generate()
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x66e10e)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	(*Context).Next: c.handlers[c.index](c)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/recovery.go:102 (0x66e0fb)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	CustomRecoveryWithWriter.func1: c.Next()
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x66d25c)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	(*Context).Next: c.handlers[c.index](c)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/logger.go:240 (0x66d243)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	LoggerWithConfig.func1: c.Next()
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/context.go:174 (0x66c7ad)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	(*Context).Next: c.handlers[c.index](c)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:620 (0x66c444)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	(*Engine).handleHTTPRequest: c.Next()
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/workspaces/golang/pkg/mod/github.com/gin-gonic/gin@v1.9.1/gin.go:576 (0x66bf89)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	(*Engine).ServeHTTP: engine.handleHTTPRequest(c)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/applications/go/src/net/http/server.go:3301 (0x43b18d)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	serverHandler.ServeHTTP: handler.ServeHTTP(rw, req)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/applications/go/src/net/http/server.go:2102 (0x42bfa4)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	(*conn).serve: serverHandler{c.server}.ServeHTTP(w, w.req)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] D:/applications/go/src/runtime/asm_amd64.s:1700 (0x1cb8c0)
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] 	goexit: BYTE	$0x90	// NOP
+[2025-05-28 09:58:45] [ERROR] [sslwang] [STDERR] [0m

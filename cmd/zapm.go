@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/zapj/zapm"
 	"github.com/zapj/zapm/cmd/commands"
@@ -24,9 +25,15 @@ func main() {
 	if err != nil {
 		// 如果获取失败，使用当前目录
 		configPath = "zapm.yml"
+		zapm.LogsDir = "logs"
+	} else if strings.Contains(execPath, "go-build") {
+		// 如果是Go编译的临时目录，使用当前目录
+		configPath = "zapm.yml"
+		zapm.LogsDir = "logs"
 	} else {
 		// 使用程序所在目录
 		execDir := filepath.Dir(execPath)
+		zapm.LogsDir = filepath.Join(execDir, "logs")
 		configPath = filepath.Join(execDir, "zapm.yml")
 	}
 
@@ -39,22 +46,8 @@ func main() {
 		panic("解析配置文件失败: " + err.Error())
 	}
 
-	// 设置日志目录
-	var logsDir string
-	if execPath != "" {
-		// 如果成功获取了可执行文件路径，使用其所在目录
-		logsDir = filepath.Join(filepath.Dir(execPath), "logs")
-	} else {
-		// 否则使用当前工作目录
-		currentDir, err := os.Getwd()
-		if err != nil {
-			panic("获取当前工作目录失败: " + err.Error())
-		}
-		logsDir = filepath.Join(currentDir, "logs")
-	}
-
 	// 获取日志目录的绝对路径
-	absLogsDir, err := filepath.Abs(logsDir)
+	absLogsDir, err := filepath.Abs(zapm.LogsDir)
 	if err != nil {
 		panic("获取日志目录绝对路径失败: " + err.Error())
 	}

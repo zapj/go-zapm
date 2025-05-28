@@ -117,16 +117,39 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	// 检查是否需要轮转
-	if l.size+int64(len(p)) >= l.maxSize {
-		if err := l.rotate(); err != nil {
-			return 0, err
+	// 将输入转换为字符串并按行分割
+	input := string(p)
+	lines := strings.Split(strings.TrimSpace(input), "\n")
+
+	for _, line := range lines {
+		if line == "" {
+			continue
 		}
+
+		// 格式化日志行
+		now := time.Now().Format("2006-01-02 15:04:05")
+		logLine := fmt.Sprintf("[%s] [STDOUT] [%s] %s\n", now, l.serviceTag, line)
+
+		// 检查是否需要轮转
+		if l.size+int64(len(logLine)) >= l.maxSize {
+			if err := l.rotate(); err != nil {
+				return 0, err
+			}
+		}
+
+		// 写入日志文件
+		written, err := l.file.WriteString(logLine)
+		if err != nil {
+			return n, err
+		}
+		l.size += int64(written)
+		n += written
+
+		// 广播日志给所有订阅者
+		l.Broadcast(logLine)
 	}
 
-	n, err = l.file.Write(p)
-	l.size += int64(n)
-	return n, err
+	return n, nil
 }
 
 // Log 记录日志
@@ -335,18 +358,24 @@ func (l *Logger) Unsubscribe(subscriber LogSubscriber) {
 // Broadcast 广播日志给所有订阅者
 func (l *Logger) Broadcast(logLine string) {
 	l.subMu.RLock()
-	defer l.subMu.RUnlock()
-
+	subscribers := make([]LogSubscriber, 0, len(l.subscribers))
 	for subscriber := range l.subscribers {
-		// 使用goroutine避免阻塞
-		go func(s LogSubscriber, line string) {
+		subscribers = append(subscribers, subscriber)
+	}
+	l.subMu.RUnlock()
+
+	// 使用单个goroutine处理所有订阅者
+	go func(subs []LogSubscriber, line string) {
+		for _, s := range subs {
 			if err := s.Send(line); err != nil {
 				// 如果发送失败，移除订阅者
-				l.Unsubscribe(s)
+				l.subMu.Lock()
+				delete(l.subscribers, s)
+				l.subMu.Unlock()
 				s.Close()
 			}
-		}(subscriber, logLine)
-	}
+		}
+	}(subscribers, logLine)
 }
 
 // GetRecentLogs 获取最近的日志内容
@@ -354,78 +383,66 @@ func (l *Logger) GetRecentLogs() []string {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	// 默认读取最后100行日志
-	const maxLines = 100
-
 	// 如果文件不存在，返回空数组
 	if l.file == nil {
 		return []string{}
 	}
 
-	// 获取文件信息
-	info, err := l.file.Stat()
-	if err != nil {
-		return []string{"Error reading log file: " + err.Error()}
-	}
+	return readLastNLinesSeek(l.filename, 100)
 
-	// 打开文件进行读取
-	file, err := os.Open(l.filename)
+}
+
+func readLastNLinesSeek(filename string, n int) []string {
+	file, err := os.Open(filename)
 	if err != nil {
 		return []string{"Error opening log file: " + err.Error()}
 	}
 	defer file.Close()
 
-	// 如果文件很小，直接读取全部内容
-	if info.Size() < 1024*1024 { // 小于1MB
-		content, err := io.ReadAll(file)
-		if err != nil {
-			return []string{"Error reading log content: " + err.Error()}
-		}
-		return strings.Split(strings.TrimSpace(string(content)), "\n")
-	}
-
-	// 对于大文件，从末尾读取
+	stat, _ := file.Stat()
+	size := stat.Size()
+	buffer := make([]byte, 1)
 	var lines []string
-	var pos int64 = 0
-	var buffer = make([]byte, 4096)
-	var lineCount = 0
+	line := make([]byte, 0)
 
-	// 从文件末尾开始读取
-	for pos < info.Size() && lineCount < maxLines {
-		// 计算读取位置
-		readPos := info.Size() - pos - int64(len(buffer))
-		if readPos < 0 {
-			buffer = make([]byte, info.Size()-pos)
-			readPos = 0
-		}
-
-		// 设置读取位置
-		_, err := file.Seek(readPos, io.SeekStart)
+	for i := int64(1); i <= size; i++ {
+		pos := size - i
+		_, err := file.Seek(pos, io.SeekStart)
 		if err != nil {
-			return append([]string{"Error seeking in log file: " + err.Error()}, lines...)
+			return []string{"Error opening log file: " + err.Error()}
 		}
-
-		// 读取数据
-		n, err := file.Read(buffer)
-		if err != nil && err != io.EOF {
-			return append([]string{"Error reading log file: " + err.Error()}, lines...)
+		_, err = file.Read(buffer)
+		if err != nil {
+			return []string{"Error opening log file: " + err.Error()}
 		}
-
-		// 处理读取的数据
-		content := string(buffer[:n])
-		newLines := strings.Split(content, "\n")
-
-		// 添加新行到结果中
-		for i := len(newLines) - 1; i >= 0 && lineCount < maxLines; i-- {
-			if newLines[i] != "" {
-				lines = append([]string{newLines[i]}, lines...)
-				lineCount++
+		if buffer[0] == '\n' {
+			if len(line) > 0 {
+				lines = append(lines, string(reverseBytes(line)))
+				line = line[:0]
+				if len(lines) >= n {
+					break
+				}
 			}
+		} else {
+			line = append(line, buffer[0])
 		}
-
-		// 更新位置
-		pos += int64(n)
 	}
-
+	if len(line) > 0 {
+		lines = append(lines, string(reverseBytes(line)))
+	}
+	reverseSlice(lines)
 	return lines
+}
+
+func reverseBytes(b []byte) []byte {
+	for i, j := 0, len(b)-1; i < j; i, j = i+1, j-1 {
+		b[i], b[j] = b[j], b[i]
+	}
+	return b
+}
+
+func reverseSlice(s []string) {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
 }

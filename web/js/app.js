@@ -9,7 +9,6 @@ let currentLogService = '';
 // 初始化函数
 function init() {
     setupWebSocket();
-    setupCharts();
     loadServices();
     setupEventListeners();
 }
@@ -23,7 +22,6 @@ function setupWebSocket() {
     socket.onmessage = function(event) {
         const stats = JSON.parse(event.data);
         updateServicesTable(stats);
-        updateCharts(stats);
     };
 
     socket.onclose = function() {
@@ -31,56 +29,6 @@ function setupWebSocket() {
     };
 }
 
-// 设置图表
-function setupCharts() {
-    const cpuCtx = document.getElementById('cpu-chart').getContext('2d');
-    const memoryCtx = document.getElementById('memory-chart').getContext('2d');
-
-    cpuChart = new Chart(cpuCtx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'CPU使用率 (%)',
-                data: [],
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1,
-                fill: false
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100
-                }
-            }
-        }
-    });
-
-    memoryChart = new Chart(memoryCtx, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [{
-                label: '内存使用 (MB)',
-                data: [],
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
 
 // 加载服务列表
 function loadServices() {
@@ -188,26 +136,6 @@ function updateServicesTable(stats) {
     });
 }
 
-// 更新图表
-function updateCharts(stats) {
-    const labels = [];
-    const cpuData = [];
-    const memoryData = [];
-    
-    for (const [name, stat] of Object.entries(stats)) {
-        labels.push(name);
-        cpuData.push(stat.cpuUsage);
-        memoryData.push(stat.memoryUsage / (1024 * 1024)); // 转换为MB
-    }
-    
-    cpuChart.data.labels = labels;
-    cpuChart.data.datasets[0].data = cpuData;
-    cpuChart.update();
-    
-    memoryChart.data.labels = labels;
-    memoryChart.data.datasets[0].data = memoryData;
-    memoryChart.update();
-}
 
 // 设置事件监听器
 function setupEventListeners() {
@@ -265,9 +193,24 @@ function fetchLogs(serviceName) {
         logContent.textContent = '';
     };
     
+    // 限制最大显示行数
+    const maxLines = 1000;
+    let logLines = [];
+
     logSocket.onmessage = function(event) {
+        // 处理接收到的日志数据
+        const newLines = event.data.split('\n');
+        
         // 添加新的日志行
-        logContent.textContent += event.data + '\n';
+        logLines.push(...newLines.filter(line => line.trim() !== ''));
+        
+        // 如果超过最大行数，删除旧的行
+        if (logLines.length > maxLines) {
+            logLines = logLines.slice(-maxLines);
+        }
+        
+        // 更新显示
+        logContent.textContent = logLines.join('\n');
         
         // 如果启用了自动滚动，则滚动到底部
         if (autoScroll) {

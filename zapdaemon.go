@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -16,16 +14,14 @@ import (
 
 type ZapDaemon struct {
 	stopChan chan struct{}
-	loggers  map[string]*Logger         // 服务日志管理器映射
-	monitors map[string]*ProcessMonitor // 进程监控器映射
-	mu       sync.Mutex                 // 保护映射
+	loggers  map[string]*Logger // 服务日志管理器映射
+	mu       sync.Mutex         // 保护映射
 }
 
 func NewZapDaemon() *ZapDaemon {
 	return &ZapDaemon{
 		stopChan: make(chan struct{}),
 		loggers:  make(map[string]*Logger),
-		monitors: make(map[string]*ProcessMonitor),
 	}
 }
 
@@ -33,6 +29,11 @@ func NewZapDaemon() *ZapDaemon {
 func (p *ZapDaemon) getLogger(service *Service) (*Logger, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+
+	// 确保loggers映射已初始化
+	if p.loggers == nil {
+		p.loggers = make(map[string]*Logger)
+	}
 
 	// 如果已存在日志管理器，直接返回
 	if logger, ok := p.loggers[service.Name]; ok {
@@ -130,12 +131,10 @@ func (p *ZapDaemon) handleProcessDeath(service *Service) {
 	logger, _ := p.getLogger(service)
 
 	// 停止监控器
-	p.mu.Lock()
-	if monitor, ok := p.monitors[service.Name]; ok {
-		monitor.Stop()
-		delete(p.monitors, service.Name)
+	if service.Monitor != nil {
+		service.Monitor.Stop()
+		service.Monitor = nil
 	}
-	p.mu.Unlock()
 
 	// 如果启用了自动重启
 	if service.AutoRestart {
@@ -158,7 +157,7 @@ func (p *ZapDaemon) handleProcessDeath(service *Service) {
 		}
 
 		// 重启服务
-		if err := p.startService(service); err != nil {
+		if err := startService(service); err != nil {
 			if logger != nil {
 				logger.Error("重启失败: %v", err)
 			}
@@ -178,89 +177,16 @@ func (p *ZapDaemon) handleProcessDeath(service *Service) {
 func (p *ZapDaemon) startAutoRunner() {
 	// 等待系统完全启动
 	time.Sleep(5 * time.Second)
-
+	log.Printf("正在自动启动服务...\n")
 	for i := range Conf.Services {
 		service := &Conf.Services[i]
 		if service.StartupType == "auto" {
 			log.Printf("自动启动服务 '%s'\n", service.Name)
-			if err := p.startService(service); err != nil {
+			if err := startService(service); err != nil {
 				log.Printf("启动服务 '%s' 失败: %v\n", service.Name, err)
 			}
 		}
 	}
-}
-
-// 启动单个服务
-func (p *ZapDaemon) startService(service *Service) error {
-	cmdParts := strings.Fields(service.Run)
-	if len(cmdParts) == 0 {
-		return fmt.Errorf("服务 '%s' 的命令无效", service.Name)
-	}
-
-	command := exec.Command(cmdParts[0], cmdParts[1:]...)
-
-	if service.WorkDir != "" {
-		command.Dir = service.WorkDir
-	}
-
-	if len(service.Env) > 0 {
-		env := os.Environ()
-		for key, value := range service.Env {
-			env = append(env, fmt.Sprintf("%s=%s", key, value))
-		}
-		command.Env = env
-	}
-
-	// 获取或创建日志管理器
-	logger, err := p.getLogger(service)
-	if err != nil {
-		return err
-	}
-
-	// 记录启动信息
-	logger.Info("正在启动服务...")
-
-	// 设置命令输出到日志管理器
-	command.Stdout = logger
-	command.Stderr = logger
-
-	// 启动进程
-	if err := command.Start(); err != nil {
-		logger.Error("启动失败: %v", err)
-		return fmt.Errorf("启动失败: %v", err)
-	}
-
-	// 更新服务状态
-	service.Status = "running"
-	service.Pid = command.Process.Pid
-
-	// 记录启动时间
-	service.StartTime = time.Now()
-
-	// 记录启动成功信息
-	logger.Info("服务已启动，PID: %d", service.Pid)
-	log.Printf("服务 '%s' 已启动，PID: %d\n", service.Name, service.Pid)
-
-	// 创建并启动进程监控器
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
-	// 如果已存在监控器，先停止它
-	if monitor, ok := p.monitors[service.Name]; ok {
-		monitor.Stop()
-	}
-
-	// 创建新的监控器
-	monitor, err := NewProcessMonitor(service, logger)
-	if err != nil {
-		logger.Warn("无法创建进程监控器: %v", err)
-	} else {
-		p.monitors[service.Name] = monitor
-		monitor.Start()
-		logger.Info("进程监控已启动")
-	}
-
-	return nil
 }
 
 func (p *ZapDaemon) Stop(s service.Service) error {
@@ -272,13 +198,14 @@ func (p *ZapDaemon) Stop(s service.Service) error {
 		close(p.stopChan)
 	}
 
-	// 停止所有监控器
-	p.mu.Lock()
-	for _, monitor := range p.monitors {
-		monitor.Stop()
+	// 停止所有服务的监控器
+	for i := range Conf.Services {
+		service := &Conf.Services[i]
+		if service.Monitor != nil {
+			service.Monitor.Stop()
+			service.Monitor = nil
+		}
 	}
-	p.monitors = make(map[string]*ProcessMonitor)
-	p.mu.Unlock()
 
 	// 停止所有运行中的服务
 	for i := range Conf.Services {
@@ -313,8 +240,10 @@ func (p *ZapDaemon) Stop(s service.Service) error {
 	}
 
 	// 关闭所有日志管理器
-	for _, logger := range p.loggers {
-		logger.Close()
+	if p.loggers != nil {
+		for _, logger := range p.loggers {
+			logger.Close()
+		}
 	}
 	p.loggers = make(map[string]*Logger)
 
