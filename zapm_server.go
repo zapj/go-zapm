@@ -534,8 +534,6 @@ func (ws *WebServer) streamLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("收到日志流请求，服务: %s", serviceName)
-
 	// 升级HTTP连接为WebSocket连接
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -543,15 +541,12 @@ func (ws *WebServer) streamLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("WebSocket连接已建立，服务: %s", serviceName)
-
 	// 设置连接参数
 	conn.SetReadLimit(4096)                                 // 增加读取消息大小限制到4KB
 	conn.SetReadDeadline(time.Now().Add(120 * time.Second)) // 增加读取超时时间到120秒
 	conn.SetPongHandler(func(string) error {
 		// 收到Pong消息时重置读取超时
 		conn.SetReadDeadline(time.Now().Add(120 * time.Second))
-		log.Printf("收到WebSocket Pong响应，重置读取超时")
 		return nil
 	})
 
@@ -560,7 +555,6 @@ func (ws *WebServer) streamLogs(w http.ResponseWriter, r *http.Request) {
 
 	// 创建WebSocket日志订阅者
 	subscriber := NewWebSocketLogSubscriber(conn)
-	log.Printf("创建WebSocket日志订阅者成功，服务: %s", serviceName)
 
 	// 创建一个done通道用于通知清理工作
 	done := make(chan struct{})
@@ -576,17 +570,13 @@ func (ws *WebServer) streamLogs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if service == nil {
-		log.Printf("未找到服务: %s", serviceName)
 		subscriber.Send(fmt.Sprintf("错误：未找到服务 %s", serviceName))
 		subscriber.Close()
 		return
 	}
 
-	log.Printf("找到服务: %s, 状态: %s", serviceName, service.Status)
-
 	// 订阅日志
 	if service.Logger != nil {
-		log.Printf("服务 %s 的Logger已初始化", serviceName)
 
 		// 发送一个测试消息，确认连接正常
 		if err := subscriber.Send("连接已建立，准备发送日志..."); err != nil {
@@ -596,10 +586,9 @@ func (ws *WebServer) streamLogs(w http.ResponseWriter, r *http.Request) {
 		}
 		// 先发送最近的日志内容，使用速率限制和分批发送
 		recentLogs := service.Logger.GetRecentLogs()
-		log.Printf("准备发送历史日志，共 %d 条", len(recentLogs))
 		for _, line := range recentLogs {
 			if err := subscriber.Send(line); err != nil {
-				log.Printf("发送测试消息失败 recentLogs: %v", err)
+				log.Printf("发送历史日志失败: %v", err)
 				subscriber.Close()
 				return
 			}
@@ -617,21 +606,14 @@ func (ws *WebServer) streamLogs(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(500 * time.Millisecond)
 
 		// 添加实时日志开始分隔符
-		if err := subscriber.Send("=== 实时日志开始 ==="); err != nil {
-			log.Printf("发送实时日志分隔符失败: %v", err)
+		if err := subscriber.Send("=== Realtime Logs Start ==="); err != nil {
 			subscriber.Close()
 			return
 		}
 
 		// 订阅新的日志
-		log.Printf("添加WebSocket订阅者到Logger，准备接收实时日志")
 		service.Logger.Subscribe(subscriber)
-
-		// 发送确认消息
-		service.Logger.Info("WebSocket实时日志订阅已激活，开始接收实时日志更新")
-
 		defer func() {
-			log.Printf("清理WebSocket连接，移除订阅者")
 			// 添加实时日志结束分隔符
 			subscriber.Send("=== Realtime Logs End ===")
 			service.Logger.Unsubscribe(subscriber)
