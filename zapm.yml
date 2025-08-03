@@ -3,20 +3,20 @@ server:
   port: 2428
 
 services:
-  - name: sslwang
-    title: SSL Wang
-    description: SSL Wang Service
-    run: D:\workspaces\golang\sslwang\ssl_wang.exe
+  - name: httpserver
+    title: Htto server Test
+    description: python3 http server test
+    run: python3 -m http.server 2888
     # auto | manual
     startup_type: auto
-    work_dir: D:\workspaces\golang\sslwang
+    work_dir: /root/works
     env:
-      SSL_MODE: production
+      MODE: production
       DEBUG: "false"
     auto_restart: true
     max_retries: 3
     retry_delay: 5
-    log_file: logs/sslwang.log
+    log_file: logs/server.log
     log_max_size: 10
     log_max_files: 5
 
